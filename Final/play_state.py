@@ -99,6 +99,9 @@ def handle_events():
                 case pico2d.SDLK_SPACE:
                     if collision_hero_map():
                         hero.state['jump'] = 7
+                case pico2d.SDLK_LSHIFT:
+                    if hero.state['dash'] == 0:
+                        hero.state['dash'] = 7
         elif event.type == SDL_KEYUP:
             hero.frame = 0
             match event.key:

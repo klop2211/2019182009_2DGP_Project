@@ -21,14 +21,14 @@ class Hero:
         self.state = {'run': False, 'jump': 0, 'dash': False, 'die': False}
 
     def draw(self, x, y):
-        # # dash
-        # if self.state['dash']:
-        #     frame_size = self.run_right.w // self.frames['run']
-        #     if self.dir == 1:
-        #         self.run_right.clip_draw(0, 0, frame_size, self.run_right.h, self.x + 20 + x, self.y + 20 + y, 40, 40)
-        #     else:
-        #         self.run_left.clip_draw(0, 0, frame_size, self.run_left.h, self.x + 20 + x, self.y + 20 + y, 40, 40)
-        #     return
+        # dash
+        if self.state['dash']:
+            frame_size = self.run_right.w // self.frames['run']
+            if self.dir == 1:
+                self.run_right.clip_draw(0, 0, frame_size, self.run_right.h, self.x + 20 + x, self.y + 20 + y, 40, 40)
+            else:
+                self.run_left.clip_draw(0, 0, frame_size, self.run_left.h, self.x + 20 + x, self.y + 20 + y, 40, 40)
+            return
         # jump
         if self.state['jump'] > 0:
             if self.dir == 1:
@@ -67,4 +67,8 @@ class Hero:
             if self.state['jump'] > 2:
                 self.y += 12 + self.status['jump'] + self.state['jump']
             self.state['jump'] -= 1
+        if self.state['dash'] > 0:
+            if self.state['dash'] > 2:
+                self.x += self.status['speed'] * 2.4 * self.dir
+            self.state['dash'] -= 1
 
