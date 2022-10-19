@@ -15,7 +15,7 @@ class Hero:
         self.y = 300
         self.frame = 0
         self.frames = {'run': 8, 'idle': 5}
-        self.status = {'speed': 10, 'jump': 5}
+        self.status = {'speed': 10, 'jump': 30}
         # 오른쪽 : 1, 왼쪽 : -1
         self.dir = 1
         self.state = {'run': False, 'jump': 0, 'dash': False, 'die': False}
@@ -25,17 +25,17 @@ class Hero:
         # if self.state['dash']:
         #     frame_size = self.run_right.w // self.frames['run']
         #     if self.dir == 1:
-        #         self.run_right.clip_draw(0, 0, frame_size, self.run_right.h, self.x + 20, self.y + 20, 40, 40)
+        #         self.run_right.clip_draw(0, 0, frame_size, self.run_right.h, self.x + 20 + x, self.y + 20 + y, 40, 40)
         #     else:
-        #         self.run_left.clip_draw(0, 0, frame_size, self.run_left.h, self.x + 20, self.y + 20, 40, 40)
+        #         self.run_left.clip_draw(0, 0, frame_size, self.run_left.h, self.x + 20 + x, self.y + 20 + y, 40, 40)
         #     return
-        # # jump
-        # if self.state['jump']:
-        #     if self.dir == 1:
-        #         self.jump_right.clip_draw(0, 0, self.jump_right.w, self.jump_right.h, self.x + 20, self.y + 20, 40, 40)
-        #     else:
-        #         self.jump_left.clip_draw(0, 0, self.jump_left.w, self.jump_left.h, self.x + 20, self.y + 20, 40, 40)
-        #     return
+        # jump
+        if self.state['jump'] > 0:
+            if self.dir == 1:
+                self.jump_right.clip_draw(0, 0, self.jump_right.w, self.jump_right.h, self.x + 20 + x, self.y + 20 + y, 40, 40)
+            else:
+                self.jump_left.clip_draw(0, 0, self.jump_left.w, self.jump_left.h, self.x + 20 + x, self.y + 20 + y, 40, 40)
+            return
         # run
         if self.state['run']:
             frame_size = self.run_right.w // self.frames['run']
@@ -59,8 +59,12 @@ class Hero:
     def update(self):
         delay(0.05)
         # 중력
-        self.y -= 10
+        self.y -= 12
         # 좌우 이동
         if self.state['run']:
             self.x += self.status['speed'] * self.dir
+        if self.state['jump'] > 0:
+            if self.state['jump'] > 2:
+                self.y += 12 + self.status['jump'] + self.state['jump']
+            self.state['jump'] -= 1
 

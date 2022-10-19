@@ -33,22 +33,25 @@ def is_cross_pt(x11, y11, x12,y12, x21,y21, x22,y22):
         return True
     return False
 
+#  주인공이 발판이나 바닥위에있는지
 def collision_hero_map():
     # 발판의 top 선분 정보
     bottoms = [(i[0] * 40, (i[1] + 1) * 40, i[2] * 40 + 40) for i in map.block_info[map.map_num]]
     # 바닥
     bottoms.append((0, 1200, 80))
     for i in bottoms:
-        if is_cross_pt(hero.x, hero.y + 40, hero.x + 40, hero.y - 5, i[0], i[2], i[1], i[2]):
+        if is_cross_pt(hero.x, hero.y + 15, hero.x + 40, hero.y - 10, i[0], i[2], i[1], i[2]):
             hero.y = i[2]
-            return
-        if is_cross_pt(hero.x + 40, hero.y + 40, hero.x, hero.y - 5, i[0], i[2], i[1], i[2]):
+            return True
+        if is_cross_pt(hero.x + 40, hero.y + 15, hero.x, hero.y - 10, i[0], i[2], i[1], i[2]):
             hero.y = i[2]
-            return
+            return True
+    return False
 
 def update():
     hero.update()
-    collision_hero_map()
+    if hero.state['jump'] == 0:
+        collision_hero_map()
     pass
 
 def draw():
@@ -92,6 +95,10 @@ def handle_events():
                 case pico2d.SDLK_d:
                     hero.dir = 1
                     hero.state['run'] = True
+                # 점프
+                case pico2d.SDLK_SPACE:
+                    if collision_hero_map():
+                        hero.state['jump'] = 7
         elif event.type == SDL_KEYUP:
             hero.frame = 0
             match event.key:
