@@ -52,7 +52,7 @@ def update():
     hero.update()
     if hero.state['jump'] == 0:
         collision_hero_map()
-    pass
+    camera.update(hero)
 
 def draw():
     global map, camera, minimap
@@ -70,15 +70,6 @@ def handle_events():
             game_framework.quit()
         elif event.type == SDL_KEYDOWN:
             match event.key:
-                # 카메라 이동을 위한 임시 문장
-                case pico2d.SDLK_UP:
-                    camera.move(0, 50)
-                case pico2d.SDLK_DOWN:
-                    camera.move(0, -50)
-                case pico2d.SDLK_LEFT:
-                    camera.move(-50, 0)
-                case pico2d.SDLK_RIGHT:
-                    camera.move(50, 0)
                 # 맵 이동을 위한 임시 문장
                 case pico2d.SDLK_1:
                     map.map_num = 0

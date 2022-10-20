@@ -1,3 +1,4 @@
+from pico2d import *
 class Camera:
     def __init__(self):
         self.x = 0
@@ -14,3 +15,7 @@ class Camera:
             self.y = -200
         elif self.y >= 0:
             self.y = 0
+
+    def update(self, hero):
+        dx, dy = hero.x + self.x + 20, hero.y + self.y + 20
+        self.move(-(400 - dx), -(300 - dy))
