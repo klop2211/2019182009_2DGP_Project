@@ -1,8 +1,9 @@
 import game_framework
-import Camera
+# import Camera
 import Map_object
 import UI_object
 import Hero_object
+import game_world
 from pico2d import *
 
 camera = None
@@ -10,12 +11,39 @@ map = None
 minimap = None
 hero = None
 
+class Camera:
+    def __init__(self):
+        self.x = 0
+        self.y = 0
+
+    def move(self, dx, dy):
+        self.x -= dx
+        if self.x <= -400:
+            self.x = -400
+        elif self.x >= 0:
+            self.x = 0
+        self.y -= dy
+        if self.y <= -200:
+            self.y = -200
+        elif self.y >= 0:
+            self.y = 0
+
+    def update(self, hero):
+        dx, dy = hero.x + self.x + 20, hero.y + self.y + 20
+        self.move(-(400 - dx), -(300 - dy))
+
+    def draw(self):
+        pass
+
 def enter():
     global map, camera, minimap, hero
     map = Map_object.Map()
-    camera = Camera.Camera()
-    minimap = UI_object.Minimap()
+    game_world.add_object(map, 0)
+    camera = Camera()
+    minimap = UI_object.Minimap(map.map_num)
+    game_world.add_object(minimap, 1)
     hero = Hero_object.Hero()
+    game_world.add_object(hero, 1)
 
 # 두점을 선분이 양분 하는지
 def is_divide_pt(x11,y11, x12,y12, x21,y21, x22,y22):
@@ -49,16 +77,24 @@ def collision_hero_map(hero, map):
     return False
 
 def update():
-    hero.update(camera.x)
-    collision_hero_map(hero, map)
+    # hero.update(camera.x)
     camera.update(hero)
+    if hero.mouse_x > hero.x + camera.x:
+        hero.face_dir = 1
+    else:
+        hero.face_dir = -1
+    for object in game_world.all_object():
+        object.update()
+    collision_hero_map(hero, map)
 
 def draw():
     global map, camera, minimap
     clear_canvas()
-    map.draw(camera.x, camera.y)
-    minimap.draw(map.map_num)
-    hero.draw(camera.x, camera.y)
+    for object in game_world.all_object():
+        object.draw(camera.x, camera.y)
+    # map.draw(camera.x, camera.y)
+    # minimap.draw(map.map_num)
+    # hero.draw(camera.x, camera.y)
     update_canvas()
     pass
 

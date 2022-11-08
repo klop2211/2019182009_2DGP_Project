@@ -226,15 +226,16 @@ class Hero:
         return
 
     def weapon_draw(self, x, y):
-        width, height = self.weapon_image_L.w * 1.3, self.weapon_image_L.h * 1.3
-        if self.dir == 1:
-            self.weapon_image_R.clip_draw(0, 0, self.weapon_image_R.w, self.weapon_image_R.h, self.x + width // 2 + x + 20,
-                                        self.y + height // 2 + y + 5, width, height)
+        width, height = self.weapon_image.w * 1.3, self.weapon_image.h * 1.3
+        if self.face_dir == 1:
+            self.weapon_image.clip_composite_draw(0, 0, self.weapon_image.w, self.weapon_image.h, 0, 'h', self.x + width // 2 + x + 20, self.y + height // 2 + y + 5, width,height)
         else:
-            self.weapon_image_L.clip_draw(0, 0, self.weapon_image_L.w, self.weapon_image_L.h, self.x + width // 2 + x,
+            self.weapon_image.clip_draw(0, 0, self.weapon_image.w, self.weapon_image.h, self.x + width // 2 + x,
                                         self.y + height // 2 + y + 5, width, height)
+        self.hand.clip_draw(0, 0, self.hand.w, self.hand.h, self.x + 20 + x, self.y + 10 + y, 7, 7)
     def draw(self, x, y):
         self.cur_state.draw(self, x, y)
+        self.weapon_draw(x, y)
         # self.body_draw(x, y)
         # self.weapon_draw(x, y)
 
@@ -248,12 +249,8 @@ class Hero:
         if event.type == SDL_MOUSEMOTION:
             self.mouse_x = event.x
 
-    def update(self, x):
+    def update(self):
         self.cur_state.do(self)
-        if self.mouse_x > self.x + x:
-            self.face_dir = 1
-        else:
-            self.face_dir = -1
         # 중력
         self.y -= 12
         if self.event_que:

@@ -25,7 +25,7 @@ class Map:
         self.block_mid = load_image('./Resource\ice_tile\Ice_OnewayM.png')
         self.block_right = load_image('./Resource\ice_tile\Ice_OnewayR.png')
         # 0 : enter, 1 : lock, 2 : clear
-        self.state = 2
+        self.state = 1
         self.map_num = 3
 
 
@@ -34,6 +34,9 @@ class Map:
                            ((3, 4, 9), (5, 9, 12), (7, 11, 8), (9, 12, 15), (12, 16, 4), (14, 17, 10), (16, 20, 7), (18, 21, 13), (23, 26, 10)),
                            ((4, 7, 4), (5, 8, 7), (3, 6, 10), (6, 9, 13), (11, 14, 15), (14, 16, 11), (19, 22, 15), (22, 26, 12), (20, 22, 9), (22, 24, 6), (20, 22, 3)),
                            ((4, 7, 6), (4, 7, 10), (4, 7, 14), (9, 13, 4), (9, 13, 8), (9, 13, 12), (15, 16, 6), (15, 16, 10), (15, 16, 14), (18, 22, 4), (18, 22, 8), (18, 22, 12), (24, 27, 6), (24, 27, 10), (24, 27, 14))]
+
+    def update(self):
+        pass
 
     def draw(self, x, y):
         self.back_ground.clip_draw(0, 0, self.back_ground.w, self.back_ground.h,
