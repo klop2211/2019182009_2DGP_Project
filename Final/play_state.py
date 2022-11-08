@@ -34,7 +34,7 @@ def is_cross_pt(x11, y11, x12,y12, x21,y21, x22,y22):
     return False
 
 #  주인공이 발판이나 바닥위에있는지
-def collision_hero_map():
+def collision_hero_map(hero, map):
     # 발판의 top 선분 정보
     bottoms = [(i[0] * 40, (i[1] + 1) * 40, i[2] * 40 + 40) for i in map.block_info[map.map_num]]
     # 바닥
@@ -49,9 +49,8 @@ def collision_hero_map():
     return False
 
 def update():
-    hero.update()
-    if hero.state['jump'] == 0:
-        collision_hero_map()
+    hero.update(camera.x)
+    collision_hero_map(hero, map)
     camera.update(hero)
 
 def draw():
@@ -68,40 +67,48 @@ def handle_events():
     for event in events:
         if event.type == SDL_QUIT:
             game_framework.quit()
-        elif event.type == SDL_KEYDOWN:
-            match event.key:
-                # 맵 이동을 위한 임시 문장
-                case pico2d.SDLK_1:
-                    map.map_num = 0
-                case pico2d.SDLK_2:
-                    map.map_num = 1
-                case pico2d.SDLK_3:
-                    map.map_num = 2
-                case pico2d.SDLK_4:
-                    map.map_num = 3
-                # 주인공 좌우이동
-                case pico2d.SDLK_a:
-                    hero.dir = -1
-                    hero.state['run'] = True
-                case pico2d.SDLK_d:
-                    hero.dir = 1
-                    hero.state['run'] = True
-                # 점프
-                case pico2d.SDLK_SPACE:
-                    if collision_hero_map():
-                        hero.state['jump'] = 7
-                case pico2d.SDLK_LSHIFT:
-                    if hero.state['dash'] == 0:
-                        hero.state['dash'] = 7
-        elif event.type == SDL_KEYUP:
-            hero.frame = 0
-            match event.key:
-                case pico2d.SDLK_a:
-                    if hero.dir == -1:
-                        hero.state['run'] = False
-                case pico2d.SDLK_d:
-                    if hero.dir == 1:
-                        hero.state['run'] = False
+        elif (event.type, event.key) == (SDL_KEYDOWN, SDLK_ESCAPE):
+            game_framework.quit()
+        else:
+            hero.handle_event(event)
+    # events = get_events()
+    # for event in events:
+    #     if event.type == SDL_QUIT:
+    #         game_framework.quit()
+    #     elif event.type == SDL_KEYDOWN:
+    #         match event.key:
+    #             # 맵 이동을 위한 임시 문장
+    #             case pico2d.SDLK_1:
+    #                 map.map_num = 0
+    #             case pico2d.SDLK_2:
+    #                 map.map_num = 1
+    #             case pico2d.SDLK_3:
+    #                 map.map_num = 2
+    #             case pico2d.SDLK_4:
+    #                 map.map_num = 3
+    #             # 주인공 좌우이동
+    #             case pico2d.SDLK_a:
+    #                 hero.dir = -1
+    #                 hero.state['run'] = True
+    #             case pico2d.SDLK_d:
+    #                 hero.dir = 1
+    #                 hero.state['run'] = True
+    #             # 점프
+    #             case pico2d.SDLK_SPACE:
+    #                 if collision_hero_map():
+    #                     hero.state['jump'] = 7
+    #             case pico2d.SDLK_LSHIFT:
+    #                 if hero.state['dash'] == 0:
+    #                     hero.state['dash'] = 7
+    #     elif event.type == SDL_KEYUP:
+    #         hero.frame = 0
+    #         match event.key:
+    #             case pico2d.SDLK_a:
+    #                 if hero.dir == -1:
+    #                     hero.state['run'] = False
+    #             case pico2d.SDLK_d:
+    #                 if hero.dir == 1:
+    #                     hero.state['run'] = False
 
 
 
