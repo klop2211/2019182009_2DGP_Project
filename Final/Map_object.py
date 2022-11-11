@@ -11,6 +11,7 @@ class Map:
         self.under = load_image('./Resource\ice_tile\Ice_H_Type2_4.png')
         self.right = load_image('./Resource\ice_tile\Ice_H_Type2_5.png')
         self.bottom = load_image('./Resource\ice_tile\Ice_H_Type2_7.png')
+
         # 각종 코너 이미지
         self.top_left = load_image('./Resource\ice_tile\Ice_H_Type2_0.png')
         self.bot_left = load_image('./Resource\ice_tile\Ice_H_Type2_6.png')

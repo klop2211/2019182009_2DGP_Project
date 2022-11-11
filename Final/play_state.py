@@ -10,6 +10,8 @@ camera = None
 map = None
 minimap = None
 hero = None
+back_ground = None
+wall_data = [[(0, 0, 30, 2), ()]]
 
 class Camera:
     def __init__(self):
@@ -36,7 +38,8 @@ class Camera:
         pass
 
 def enter():
-    global map, camera, minimap, hero
+    global map, camera, minimap, hero, back_ground
+    back_ground = load_image('./Resource\ice_tile\BGLayer_0 #218364.png')
     map = Map_object.Map()
     game_world.add_object(map, 0)
     camera = Camera()
@@ -90,6 +93,7 @@ def update():
 def draw():
     global map, camera, minimap
     clear_canvas()
+    back_ground.clip_draw(0, 0, back_ground.w, back_ground.h, camera.x + 1200 // 2, camera.y + 800 // 2, 1200, 800)
     for object in game_world.all_object():
         object.draw(camera.x, camera.y)
     # map.draw(camera.x, camera.y)
