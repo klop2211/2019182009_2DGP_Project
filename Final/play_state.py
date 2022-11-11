@@ -11,9 +11,15 @@ map = None
 minimap = None
 hero = None
 back_ground = None
-wall_data = [[(0, 6, 1, 18), (29, 6, 30, 18)]]
-block_data = [[(0, 0, 30, 2), (5, 5, 10, 5), (10, 8, 15, 8), (7, 12, 12, 12), (11, 16, 16, 16), (16, 13, 19, 13), (19, 11, 22, 11), (21, 8, 26, 8)]]
-door_data = [[(0, 2, 1, 6), (29, 2, 30, 6)]]
+wall_data = [[(0, 6, 1, 18), (29, 6, 30, 18)],
+             [(0, 6, 1, 18), (29, 13, 30, 18), (29, 2, 30, 9)],
+             [(0, 6, 1, 18), (29, 2, 30, 11), (29, 15, 30, 18)],
+             [(0, 6, 1, 18), (29, 2, 30, 18)]]
+block_data = [[(0, 0, 29, 2), (5, 5, 9, 5), (10, 8, 14, 8), (7, 12, 11, 12), (11, 16, 15, 16), (16, 13, 18, 13), (19, 11, 21, 11), (21, 8, 25, 8)],
+              [(0, 0, 29, 2), (3, 10, 4, 10), (5, 13, 9, 13), (7, 9, 11, 9), (9, 16, 12, 16), (12, 5, 16, 5), (14, 11, 17, 11), (16, 8, 20, 8), (18, 14, 21, 14), (23, 11, 26, 11)],
+              [(0, 0, 29, 2), (4, 5, 7, 5), (5, 8, 8, 8), (3, 11, 6, 11), (6, 14, 9, 14), (11, 16, 14, 16), (14, 12, 16, 12), (19, 16, 22, 16), (22, 13, 26, 13), (20, 10, 22, 10), (22, 7, 24, 7), (20, 4, 22, 4)],
+              [(0, 0, 29, 2), (4, 7, 7, 7), (4, 11, 7, 11), (4, 15, 7, 15), (9, 5, 13, 5), (9, 9, 13, 9), (9, 13, 13, 13), (15, 7, 16, 7), (15, 11, 16, 11), (15, 15, 16, 15), (18, 5, 22, 5), (18, 9, 22, 9), (18, 13, 22, 13), (24, 7, 27, 7), (24, 11, 27, 11), (24, 15, 27, 15)]]
+door_data = [[(0, 2, 1, 6), (29, 2, 30, 6)], [(0, 2, 1, 6), (29, 9, 30, 13)], [(0, 2, 1, 6), (29, 11, 30, 15)], [(0, 2, 1, 6)]]
 walls = None
 blocks = None
 doors = None
@@ -22,12 +28,11 @@ def enter():
     global map, minimap, hero, back_ground, walls, doors, blocks
     back_ground = load_image('./Resource\ice_tile\BGLayer_0 #218364.png')
     map = Map_object.Map()
-    camera = Camera.Camera()
     minimap = UI_object.Minimap(map.map_num)
     hero = Hero_object.Hero()
-    walls = [Map_bb.Wall(*l) for l in wall_data[0]]
-    blocks = [Map_bb.Block(*l) for l in block_data[0]]
-    doors = [Map_bb.Door(*l) for l in door_data[0]]
+    walls = [Map_bb.Wall(*l) for l in wall_data[map.map_num]]
+    blocks = [Map_bb.Block(*l) for l in block_data[map.map_num]]
+    doors = [Map_bb.Door(*l) for l in door_data[map.map_num]]
     game_world.add_objects(walls, 0)
     game_world.add_object(map, 0)
     game_world.add_object(minimap, 1)

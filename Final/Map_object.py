@@ -26,7 +26,7 @@ class Map:
         self.block_mid = load_image('./Resource\ice_tile\Ice_OnewayM.png')
         self.block_right = load_image('./Resource\ice_tile\Ice_OnewayR.png')
         # 0 : enter, 1 : lock, 2 : clear
-        self.state = 1
+        self.state = 2
         self.map_num = 3
 
 
