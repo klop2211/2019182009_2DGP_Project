@@ -1,52 +1,40 @@
 import game_framework
-# import Camera
+import Camera
 import Map_object
 import UI_object
 import Hero_object
 import game_world
+import Map_bb
 from pico2d import *
 
-camera = None
 map = None
 minimap = None
 hero = None
 back_ground = None
-wall_data = [[(0, 0, 30, 2), ()]]
-
-class Camera:
-    def __init__(self):
-        self.x = 0
-        self.y = 0
-
-    def move(self, dx, dy):
-        self.x -= dx
-        if self.x <= -400:
-            self.x = -400
-        elif self.x >= 0:
-            self.x = 0
-        self.y -= dy
-        if self.y <= -200:
-            self.y = -200
-        elif self.y >= 0:
-            self.y = 0
-
-    def update(self, hero):
-        dx, dy = hero.x + self.x + 20, hero.y + self.y + 20
-        self.move(-(400 - dx), -(300 - dy))
-
-    def draw(self):
-        pass
+wall_data = [[(0, 6, 1, 18), (29, 6, 30, 18)]]
+block_data = [[(0, 0, 30, 2), (5, 5, 10, 5), (10, 8, 15, 8), (7, 12, 12, 12), (11, 16, 16, 16), (16, 13, 19, 13), (19, 11, 22, 11), (21, 8, 26, 8)]]
+door_data = [[(0, 2, 1, 6), (29, 2, 30, 6)]]
+walls = None
+blocks = None
+doors = None
 
 def enter():
-    global map, camera, minimap, hero, back_ground
+    global map, minimap, hero, back_ground, walls, doors, blocks
     back_ground = load_image('./Resource\ice_tile\BGLayer_0 #218364.png')
     map = Map_object.Map()
-    game_world.add_object(map, 0)
-    camera = Camera()
+    camera = Camera.Camera()
     minimap = UI_object.Minimap(map.map_num)
-    game_world.add_object(minimap, 1)
     hero = Hero_object.Hero()
+    walls = [Map_bb.Wall(*l) for l in wall_data[0]]
+    blocks = [Map_bb.Block(*l) for l in block_data[0]]
+    doors = [Map_bb.Door(*l) for l in door_data[0]]
+    game_world.add_objects(walls, 0)
+    game_world.add_object(map, 0)
+    game_world.add_object(minimap, 1)
     game_world.add_object(hero, 1)
+    game_world.add_collision_pairs(hero, walls, 'hero:wall')
+    game_world.add_collision_pairs(hero, blocks, 'hero:block')
+    game_world.add_collision_pairs(hero, doors, 'hero:door')
 
 # 두점을 선분이 양분 하는지
 def is_divide_pt(x11,y11, x12,y12, x21,y21, x22,y22):
@@ -79,23 +67,36 @@ def collision_hero_map(hero, map):
             return True
     return False
 
+def collide(a, b):
+    left_a, bottom_a, right_a, top_a = a.get_bb()
+    left_b, bottom_b, right_b, top_b = b.get_bb()
+    if left_a > right_b: return False
+    if right_a < left_b: return False
+    if top_a < bottom_b: return False
+    if bottom_a > top_b: return False
+
+    return True
+
 def update():
     # hero.update(camera.x)
-    camera.update(hero)
-    if hero.mouse_x > hero.x + camera.x:
+    Camera.camera.update(hero)
+    if hero.mouse_x > hero.x + Camera.camera.x:
         hero.face_dir = 1
     else:
         hero.face_dir = -1
     for object in game_world.all_object():
         object.update()
-    collision_hero_map(hero, map)
+    for a, b, group in game_world.all_collision_pairs():
+        if collide(a, b):
+            a.handle_collision(b, group)
+            b.handle_collision(a, group)
 
 def draw():
     global map, camera, minimap
     clear_canvas()
-    back_ground.clip_draw(0, 0, back_ground.w, back_ground.h, camera.x + 1200 // 2, camera.y + 800 // 2, 1200, 800)
+    back_ground.clip_draw(0, 0, back_ground.w, back_ground.h, Camera.camera.x + 1200 // 2, Camera.camera.y + 800 // 2, 1200, 800)
     for object in game_world.all_object():
-        object.draw(camera.x, camera.y)
+        object.draw(Camera.camera.x, Camera.camera.y)
     # map.draw(camera.x, camera.y)
     # minimap.draw(map.map_num)
     # hero.draw(camera.x, camera.y)

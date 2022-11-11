@@ -1,6 +1,7 @@
 from pico2d import *
 
 import Bullet
+import Camera
 import game_world
 import game_framework
 import time
@@ -33,18 +34,16 @@ class IDLE:
         print('EXIT IDLE')
     @staticmethod
     def do(self):
-        pass
+        self.frame = (self.frame + FRAMES_PER_ACTION * ACTION_PER_TIME * game_framework.frame_time) % self.frames['idle']
     @staticmethod
     def draw(self, x, y):
         frame_size = self.idle_left.w // self.frames['idle']
         if self.face_dir == 1:
-            self.idle_right.clip_draw(frame_size * self.frame, 0, frame_size, self.idle_right.h, self.x + 20 + x,
+            self.idle_right.clip_draw(frame_size * int(self.frame), 0, frame_size, self.idle_right.h, self.x + 20 + x,
                                       self.y + 20 + y, 40, 40)
         else:
-            self.idle_left.clip_draw(frame_size * self.frame, 0, frame_size, self.idle_left.h, self.x + 20 + x,
+            self.idle_left.clip_draw(frame_size * int(self.frame), 0, frame_size, self.idle_left.h, self.x + 20 + x,
                                      self.y + 20 + y, 40, 40)
-        self.frame += 1
-        self.frame %= self.frames['idle']
 
 class RUN:
     @staticmethod
@@ -64,17 +63,16 @@ class RUN:
         print('EXIT RUN')
     @staticmethod
     def do(self):
-        self.frame = (self.frame + 1) % self.frames['run']
-        self.x += self.dir * self.status['speed'] * PIXEL_PER_METER * game_framework.frame_time
-        self.x = clamp(40, self.x, 1160)
+        self.frame = (self.frame + FRAMES_PER_ACTION * ACTION_PER_TIME * game_framework.frame_time) % self.frames['run']
+        self.move()
     @staticmethod
     def draw(self, x, y):
         frame_size = self.run_right.w // self.frames['run']
         if self.face_dir == 1:
-            self.run_right.clip_draw(frame_size * self.frame, 0, frame_size, self.run_right.h, self.x + 20 + x,
+            self.run_right.clip_draw(frame_size * int(self.frame), 0, frame_size, self.run_right.h, self.x + 20 + x,
                                     self.y + 20 + y, 40, 40)
         elif self.face_dir == -1:
-            self.run_left.clip_draw(frame_size * self.frame, 0, frame_size, self.run_left.h, self.x + 20 + x,
+            self.run_left.clip_draw(frame_size * int(self.frame), 0, frame_size, self.run_left.h, self.x + 20 + x,
                                     self.y + 20 + y, 40, 40)
 
 class JUMP:
@@ -90,19 +88,17 @@ class JUMP:
             self.dir -= 1
         elif event == aU:
             self.dir += 1
-        if event == SPACE and time.time() - JUMP.runtime > 0.1:
+        if event == SPACE and time.time() - JUMP.runtime > 0.3:
             JUMP.runtime = time.time()
     @staticmethod
     def exit(self, event):
         print('EXIT JUMP')
     @staticmethod
     def do(self):
-        self.y += PIXEL_PER_METER * game_framework.frame_time * self.status['jump']
+        self.y += PIXEL_PER_METER * game_framework.frame_time * (self.status['jump'] + 10)
         print('do jump')
-        self.y = clamp(80, self.y, 680)
-        self.x += self.dir * self.status['speed'] * PIXEL_PER_METER * game_framework.frame_time
-        self.x = clamp(40, self.x, 1160)
-        if time.time() - JUMP.runtime > 1:
+        self.move()
+        if time.time() - JUMP.runtime > 0.3:
             if self.dir == 0:
                 self.add_event(TIMER)
             else:
@@ -120,7 +116,7 @@ class JUMP:
                                      40)
 
 class DASH:
-    runidle = True
+
     runtime = 0
     @staticmethod
     def enter(self, event):
@@ -141,7 +137,6 @@ class DASH:
     @staticmethod
     def do(self):
         self.x += 10 * PIXEL_PER_METER * game_framework.frame_time * 5 * self.dir
-        self.x = clamp(40, self.x, 1160)
         if time.time() - DASH.runtime > 0.1:
             if self.dir == 0:
                 self.add_event(TIMER)
@@ -172,6 +167,10 @@ RUN_SPEED_PPS = RUN_SPEED_MPS * PIXEL_PER_METER
 TIME_PER_ACTION = 0.5
 ACTION_PER_TIME = 1.0 / TIME_PER_ACTION
 FRAMES_PER_ACTION = 8
+import math
+
+def distance(x, y):
+    return math.sqrt(x * x + y * y)
 
 # 주인공 : 크기 (40,40)
 class Hero:
@@ -193,7 +192,7 @@ class Hero:
         self.y = 300
         self.frame = 0
         self.frames = {'run': 8, 'idle': 5}
-        self.status = {'speed': 10, 'jump': 50}
+        self.status = {'speed': 10, 'jump': 15}
         # 오른쪽 : 1, 왼쪽 : -1
         self.dir = 0
         self.face_dir = 1
@@ -202,11 +201,23 @@ class Hero:
         self.cur_state = IDLE
         self.cur_state.enter(self, None)
         self.mouse_x = 0
+        self.normal = [0, 0]
 
-    
+    def move(self):
+        self.x += self.dir * self.status['speed'] * PIXEL_PER_METER * game_framework.frame_time
 
     def get_bb(self):
         return self.x - 20, self.y - 20, self.x + 20, self.y + 20
+
+    def handle_collision(self, other, group):
+        match group:
+            case 'hero:wall':
+                self.x = clamp(40, self.x, 1160)
+            case 'hero:block':
+                self.y = clamp(other.top * 40, self.y, 660)
+            case 'hero:door':
+                pass
+
 
     def weapon_draw(self, x, y):
         width, height = self.weapon_image.w * 1.3, self.weapon_image.h * 1.3
@@ -219,14 +230,18 @@ class Hero:
 
     def draw(self, x, y):
         self.cur_state.draw(self, x, y)
-        draw_rectangle(*self.get_bb())
         self.weapon_draw(x, y)
         # self.body_draw(x, y)
 
     def attack(self):
         if self.weapon_type == 1:
-            bullet = Bullet.Bullet(self.x, self.y, self.face_dir)
+            bullet = Bullet.Bullet(self.x, self.y, self.normal[0], self.normal[1])
             game_world.add_object(bullet, 1)
+
+    def set_normal(self, x, y):
+        d = distance(x - self.x, y - self.y)
+        self.normal[0] = (x - self.x) / d
+        self.normal[1] = (y - self.y) / d
 
     def add_event(self, event):
         self.event_que.insert(0, event)
@@ -237,14 +252,16 @@ class Hero:
             self.add_event(key_event)
         if (event.type, event.button) in mouse_event_table:
             mouse_event = mouse_event_table[(event.type, event.button)]
+            self.set_normal(event.x - Camera.camera.x, 600 - event.y - Camera.camera.y)
             self.add_event(mouse_event)
         if event.type == SDL_MOUSEMOTION:
             self.mouse_x = event.x
 
     def update(self):
         self.cur_state.do(self)
+        self.y = min(680, self.y)
         # 중력
-        self.y -= 12 * PIXEL_PER_METER * game_framework.frame_time
+        self.y -= 10 * PIXEL_PER_METER * game_framework.frame_time
         if self.event_que:
             event = self.event_que.pop()
             self.cur_state.exit(self, event)
