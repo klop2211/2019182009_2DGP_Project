@@ -5,6 +5,7 @@ import UI_object
 import Hero_object
 import game_world
 import Map_bb
+import Monster_object
 from pico2d import *
 
 map = None
@@ -24,9 +25,10 @@ walls = []
 blocks = []
 doors = []
 check_col = None
+biggrayskuls = []
 
 def set_map():
-    global map, walls, doors, blocks, check_col, minimap
+    global map, walls, doors, blocks, check_col, minimap, biggrayskuls
     minimap.num = map.map_num
     for o in walls:
         game_world.remove_collision_object(o)
@@ -40,22 +42,30 @@ def set_map():
     game_world.add_collision_pairs(hero, walls, 'hero:wall')
     game_world.add_collision_pairs(hero, blocks, 'hero:block')
     game_world.add_collision_pairs(hero, doors, 'hero:door')
+    game_world.add_collision_pairs(biggrayskuls, blocks, 'biggrayskel:block')
 
 def enter():
-    global map, minimap, hero, back_ground, walls, doors, blocks, check_col
+    global map, minimap, hero, back_ground, walls, doors, blocks, biggrayskuls
     check_col = True
     back_ground = load_image('./Resource\ice_tile\BGLayer_0 #218364.png')
     map = Map_object.Map()
     minimap = UI_object.Minimap(map.map_num)
     hero = Hero_object.Hero()
+    biggrayskuls.append(Monster_object.Biggrayskul(16 * 40, 2 * 40, 10))
+    biggrayskuls.append(Monster_object.Biggrayskul(7 * 40, 5 * 40, 10))
+    biggrayskuls.append(Monster_object.Biggrayskul(24 * 40, 8 * 40, 10))
+    biggrayskuls.append(Monster_object.Biggrayskul(17 * 40, 13 * 40, 10))
+    biggrayskuls.append(Monster_object.Biggrayskul(10 * 40, 12 * 40, 10))
     set_map()
     # walls = [Map_bb.Wall(*l) for l in wall_data[map.map_num]]
     # blocks = [Map_bb.Block(*l) for l in block_data[map.map_num]]
     # doors = [Map_bb.Door(*l) for l in door_data[map.map_num]]
     game_world.add_objects(walls, 0)
     game_world.add_object(map, 0)
-    game_world.add_object(minimap, 1)
     game_world.add_object(hero, 1)
+    game_world.add_objects(biggrayskuls, 1)
+    game_world.add_collision_pairs(hero, biggrayskuls, 'hero:biggrayskel')
+    game_world.add_object(minimap, 1)
     # game_world.add_collision_pairs(hero, walls, 'hero:wall')
     # game_world.add_collision_pairs(hero, blocks, 'hero:block')
     # game_world.add_collision_pairs(hero, doors, 'hero:door')
@@ -80,11 +90,10 @@ def update():
         hero.face_dir = -1
     for object in game_world.all_object():
         object.update()
-    if check_col:
-        for a, b, group in game_world.all_collision_pairs():
-            if collide(a, b):
-                a.handle_collision(b, group)
-                b.handle_collision(a, group)
+    for a, b, group in game_world.all_collision_pairs():
+        if collide(a, b):
+            a.handle_collision(b, group)
+            b.handle_collision(a, group)
 
 def draw():
     global map, camera, minimap

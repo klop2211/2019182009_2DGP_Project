@@ -189,8 +189,8 @@ class Hero:
         self.equip_weapon = 'Colt'
         # 0 근접무기, 1 원거리무기
         self.weapon_type = 1
-        self.x = 400
-        self.y = 300
+        self.x = 80
+        self.y = 80
         self.frame = 0
         self.frames = {'run': 8, 'idle': 5}
         self.status = {'speed': 10, 'jump': 15}
@@ -217,7 +217,6 @@ class Hero:
             case 'hero:block':
                 self.y = clamp(other.top * 40, self.y, 660)
             case 'hero:door':
-                print(f'{other.left}, {play_state.map.map_num}')
                 if other.left < 20:
                     if play_state.map.state == 0 or play_state.map.state == 2:
                         if play_state.map.map_num > 0:
