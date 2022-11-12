@@ -27,7 +27,7 @@ class Map:
         self.block_right = load_image('./Resource\ice_tile\Ice_OnewayR.png')
         # 0 : enter, 1 : lock, 2 : clear
         self.state = 2
-        self.map_num = 3
+        self.map_num = 1
 
 
         # 발판의 위치를 x1, x2, y 순으로 가진 리스트, map_num를 통해 맵을 변경 1/40으로 축소 되있음
@@ -124,7 +124,6 @@ class Map:
                                               y + num[2] * 40 + 20, 40, 40)
                 else:
                     self.block_mid.clip_draw(0, 0, self.block_mid.w, self.block_mid.h, x + i * 40 + 20, y + num[2] * 40 + 20, 40, 40)
-
 
 
 

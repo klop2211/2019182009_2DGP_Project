@@ -1,5 +1,6 @@
 from pico2d import *
 
+import play_state
 import Bullet
 import Camera
 import game_world
@@ -216,8 +217,27 @@ class Hero:
             case 'hero:block':
                 self.y = clamp(other.top * 40, self.y, 660)
             case 'hero:door':
-                pass
-
+                print(f'{other.left}, {play_state.map.map_num}')
+                if other.left < 20:
+                    if play_state.map.state == 0 or play_state.map.state == 2:
+                        if play_state.map.map_num > 0:
+                            play_state.map.map_num -= 1
+                            play_state.set_map()
+                            self.x = 1120
+                        else:
+                            self.x = clamp(40, self.x, 1160)
+                    else:
+                        self.x = clamp(40, self.x, 1160)
+                else:
+                    if play_state.map.state == 2:
+                        if play_state.map.map_num < 3:
+                            play_state.map.map_num += 1
+                            play_state.set_map()
+                            self.x = 80
+                        else:
+                            self.x = clamp(40, self.x, 1160)
+                    else:
+                        self.x = clamp(40, self.x, 1160)
 
     def weapon_draw(self, x, y):
         width, height = self.weapon_image.w * 1.3, self.weapon_image.h * 1.3

@@ -20,57 +20,46 @@ block_data = [[(0, 0, 29, 2), (5, 5, 9, 5), (10, 8, 14, 8), (7, 12, 11, 12), (11
               [(0, 0, 29, 2), (4, 5, 7, 5), (5, 8, 8, 8), (3, 11, 6, 11), (6, 14, 9, 14), (11, 16, 14, 16), (14, 12, 16, 12), (19, 16, 22, 16), (22, 13, 26, 13), (20, 10, 22, 10), (22, 7, 24, 7), (20, 4, 22, 4)],
               [(0, 0, 29, 2), (4, 7, 7, 7), (4, 11, 7, 11), (4, 15, 7, 15), (9, 5, 13, 5), (9, 9, 13, 9), (9, 13, 13, 13), (15, 7, 16, 7), (15, 11, 16, 11), (15, 15, 16, 15), (18, 5, 22, 5), (18, 9, 22, 9), (18, 13, 22, 13), (24, 7, 27, 7), (24, 11, 27, 11), (24, 15, 27, 15)]]
 door_data = [[(0, 2, 1, 6), (29, 2, 30, 6)], [(0, 2, 1, 6), (29, 9, 30, 13)], [(0, 2, 1, 6), (29, 11, 30, 15)], [(0, 2, 1, 6)]]
-walls = None
-blocks = None
-doors = None
+walls = []
+blocks = []
+doors = []
+check_col = None
 
-def enter():
-    global map, minimap, hero, back_ground, walls, doors, blocks
-    back_ground = load_image('./Resource\ice_tile\BGLayer_0 #218364.png')
-    map = Map_object.Map()
-    minimap = UI_object.Minimap(map.map_num)
-    hero = Hero_object.Hero()
+def set_map():
+    global map, walls, doors, blocks, check_col, minimap
+    minimap.num = map.map_num
+    for o in walls:
+        game_world.remove_collision_object(o)
+    for o in blocks:
+        game_world.remove_collision_object(o)
+    for o in doors:
+        game_world.remove_collision_object(o)
     walls = [Map_bb.Wall(*l) for l in wall_data[map.map_num]]
     blocks = [Map_bb.Block(*l) for l in block_data[map.map_num]]
     doors = [Map_bb.Door(*l) for l in door_data[map.map_num]]
-    game_world.add_objects(walls, 0)
-    game_world.add_object(map, 0)
-    game_world.add_object(minimap, 1)
-    game_world.add_object(hero, 1)
     game_world.add_collision_pairs(hero, walls, 'hero:wall')
     game_world.add_collision_pairs(hero, blocks, 'hero:block')
     game_world.add_collision_pairs(hero, doors, 'hero:door')
 
-# 두점을 선분이 양분 하는지
-def is_divide_pt(x11,y11, x12,y12, x21,y21, x22,y22):
-    f1 = (x12-x11)*(y21-y11) - (y12-y11)*(x21-x11)
-    f2 = (x12-x11)*(y22-y11) - (y12-y11)*(x22-x11)
-    if f1*f2 < 0:
-        return True
-    else:
-        return False
-# 두선분이 교차하는지
-def is_cross_pt(x11, y11, x12,y12, x21,y21, x22,y22):
-    b1 = is_divide_pt(x11, y11, x12, y12, x21, y21, x22, y22)
-    b2 = is_divide_pt(x21, y21, x22, y22, x11, y11, x12, y12)
-    if b1 and b2:
-        return True
-    return False
+def enter():
+    global map, minimap, hero, back_ground, walls, doors, blocks, check_col
+    check_col = True
+    back_ground = load_image('./Resource\ice_tile\BGLayer_0 #218364.png')
+    map = Map_object.Map()
+    minimap = UI_object.Minimap(map.map_num)
+    hero = Hero_object.Hero()
+    set_map()
+    # walls = [Map_bb.Wall(*l) for l in wall_data[map.map_num]]
+    # blocks = [Map_bb.Block(*l) for l in block_data[map.map_num]]
+    # doors = [Map_bb.Door(*l) for l in door_data[map.map_num]]
+    game_world.add_objects(walls, 0)
+    game_world.add_object(map, 0)
+    game_world.add_object(minimap, 1)
+    game_world.add_object(hero, 1)
+    # game_world.add_collision_pairs(hero, walls, 'hero:wall')
+    # game_world.add_collision_pairs(hero, blocks, 'hero:block')
+    # game_world.add_collision_pairs(hero, doors, 'hero:door')
 
-#  주인공이 발판이나 바닥위에있는지
-def collision_hero_map(hero, map):
-    # 발판의 top 선분 정보
-    bottoms = [(i[0] * 40, (i[1] + 1) * 40, i[2] * 40 + 40) for i in map.block_info[map.map_num]]
-    # 바닥
-    bottoms.append((0, 1200, 80))
-    for i in bottoms:
-        if is_cross_pt(hero.x, hero.y + 15, hero.x + 40, hero.y - 10, i[0], i[2], i[1], i[2]):
-            hero.y = i[2]
-            return True
-        if is_cross_pt(hero.x + 40, hero.y + 15, hero.x, hero.y - 10, i[0], i[2], i[1], i[2]):
-            hero.y = i[2]
-            return True
-    return False
 
 def collide(a, b):
     left_a, bottom_a, right_a, top_a = a.get_bb()
@@ -91,10 +80,11 @@ def update():
         hero.face_dir = -1
     for object in game_world.all_object():
         object.update()
-    for a, b, group in game_world.all_collision_pairs():
-        if collide(a, b):
-            a.handle_collision(b, group)
-            b.handle_collision(a, group)
+    if check_col:
+        for a, b, group in game_world.all_collision_pairs():
+            if collide(a, b):
+                a.handle_collision(b, group)
+                b.handle_collision(a, group)
 
 def draw():
     global map, camera, minimap
