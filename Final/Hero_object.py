@@ -61,6 +61,8 @@ class RUN:
             self.dir += 1
     @staticmethod
     def exit(self, event):
+        if event == MOUSE_LD:
+            self.attack()
         print('EXIT RUN')
     @staticmethod
     def do(self):
@@ -93,6 +95,8 @@ class JUMP:
             JUMP.runtime = time.time()
     @staticmethod
     def exit(self, event):
+        if event == MOUSE_LD:
+            self.attack()
         print('EXIT JUMP')
     @staticmethod
     def do(self):
@@ -134,6 +138,8 @@ class DASH:
             DASH.runtime = time.time()
     @staticmethod
     def exit(self, event):
+        if event == MOUSE_LD:
+            self.attack()
         print('EXIT DASH')
     @staticmethod
     def do(self):
@@ -231,6 +237,7 @@ class Hero:
                     if play_state.map.state == 2:
                         if play_state.map.map_num < 3:
                             play_state.map.map_num += 1
+                            play_state.map.state = 0
                             play_state.set_map()
                             self.x = 80
                         else:
