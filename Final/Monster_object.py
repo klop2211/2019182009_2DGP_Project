@@ -180,3 +180,4 @@ class Biggrayskul(Monster):
         self.cur_state.draw(self, x, y)
         # draw_rectangle(self.x + x, self.y + y, self.x + 67 + x, self.y + 96 + y)
 
+

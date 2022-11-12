@@ -1,3 +1,6 @@
+import time
+
+import Banshee
 import game_framework
 import Camera
 import Map_object
@@ -26,9 +29,11 @@ blocks = []
 doors = []
 check_col = None
 biggrayskuls = []
+banshees = []
+spawn_timer = None
 
 def set_map():
-    global map, walls, doors, blocks, check_col, minimap, biggrayskuls
+    global map, walls, doors, blocks, check_col, minimap, biggrayskuls, spawn_timer
     minimap.num = map.map_num
     for o in walls:
         game_world.remove_collision_object(o)
@@ -42,10 +47,15 @@ def set_map():
     game_world.add_collision_pairs(hero, walls, 'hero:wall')
     game_world.add_collision_pairs(hero, blocks, 'hero:block')
     game_world.add_collision_pairs(hero, doors, 'hero:door')
-    game_world.add_collision_pairs(biggrayskuls, blocks, 'biggrayskel:block')
+    spawn_timer = time.time()
+    for o in biggrayskuls:
+        game_world.remove_object(o)
+    for o in banshees:
+        game_world.remove_object(o)
+
 
 def enter():
-    global map, minimap, hero, back_ground, walls, doors, blocks, biggrayskuls
+    global map, minimap, hero, back_ground, walls, doors, blocks, biggrayskuls, banshees
     check_col = True
     back_ground = load_image('./Resource\ice_tile\BGLayer_0 #218364.png')
     map = Map_object.Map()
@@ -56,6 +66,13 @@ def enter():
     biggrayskuls.append(Monster_object.Biggrayskul(24 * 40, 8 * 40, 10))
     biggrayskuls.append(Monster_object.Biggrayskul(17 * 40, 13 * 40, 10))
     biggrayskuls.append(Monster_object.Biggrayskul(10 * 40, 12 * 40, 10))
+    banshees.append(Banshee.Banshee(6 * 40, 2 * 40, 10))
+    banshees.append(Banshee.Banshee(4 * 40, 10 * 40, 10))
+    banshees.append(Banshee.Banshee(10 * 40, 16 * 40, 10))
+    banshees.append(Banshee.Banshee(14 * 40, 5 * 40, 10))
+    banshees.append(Banshee.Banshee(14 * 40, 11 * 40, 10))
+    banshees.append(Banshee.Banshee(19 * 40, 14 * 40, 10))
+    banshees.append(Banshee.Banshee(20 * 40, 8 * 40, 10))
     set_map()
     # walls = [Map_bb.Wall(*l) for l in wall_data[map.map_num]]
     # blocks = [Map_bb.Block(*l) for l in block_data[map.map_num]]
@@ -63,8 +80,6 @@ def enter():
     game_world.add_objects(walls, 0)
     game_world.add_object(map, 0)
     game_world.add_object(hero, 1)
-    game_world.add_objects(biggrayskuls, 1)
-    game_world.add_collision_pairs(hero, biggrayskuls, 'hero:biggrayskel')
     game_world.add_object(minimap, 1)
     # game_world.add_collision_pairs(hero, walls, 'hero:wall')
     # game_world.add_collision_pairs(hero, blocks, 'hero:block')
@@ -81,9 +96,21 @@ def collide(a, b):
 
     return True
 
+def monster_spawn():
+    if map.map_num == 0 and map.state < 3:
+        game_world.add_objects(biggrayskuls, 1)
+        game_world.add_collision_pairs(hero, biggrayskuls, 'hero:biggrayskel')
+        game_world.add_collision_pairs(biggrayskuls, blocks, 'biggrayskel:block')
+    if map.map_num == 1 and map.state < 3:
+        game_world.add_objects(banshees, 1)
+        game_world.add_collision_pairs(hero, banshees, 'hero:banshee')
+
 def update():
     # hero.update(camera.x)
     Camera.camera.update(hero)
+    if time.time() - spawn_timer > 3 and map.state == 0:
+        monster_spawn()
+        map.state = 2
     if hero.mouse_x > hero.x + Camera.camera.x:
         hero.face_dir = 1
     else:
