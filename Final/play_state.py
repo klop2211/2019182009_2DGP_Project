@@ -108,7 +108,7 @@ def monster_spawn():
 def update():
     # hero.update(camera.x)
     Camera.camera.update(hero)
-    if time.time() - spawn_timer > 3 and map.state == 0:
+    if time.time() - spawn_timer > 1 and map.state == 0:
         monster_spawn()
         map.state = 2
     if hero.mouse_x > hero.x + Camera.camera.x:

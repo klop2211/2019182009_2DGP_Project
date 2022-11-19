@@ -6,56 +6,8 @@ import Monster_object
 import game_framework
 import game_world
 import play_state
+from BehaviorTree import BehaviorTree, SelectorNode, SequenceNode, LeafNode
 
-class IDLE:
-    def enter(self, event):
-        self.frame = 0
-        self.idletime = time.time()
-        print('ENTER IDLE')
-    @staticmethod
-    def exit(self, event):
-        print('EXIT IDLE')
-    @staticmethod
-    def do(self):
-        self.frame = (self.frame + FRAMES_PER_ACTION * ACTION_PER_TIME * game_framework.frame_time) % self.frames['idle']
-        if time.time() - self.idletime > self.cooltime:
-            self.cur_state.exit(self, None)
-            self.cur_state = ATTACK
-            self.cur_state.enter(self, None)
-    @staticmethod
-    def draw(self, x, y):
-        frame_size = self.idle.w // self.frames['idle']
-        if self.face_dir == 1:
-            self.idle.clip_draw(frame_size * int(self.frame), 0, frame_size, self.idle.h, self.x + 20 + x,
-                                      self.y + 22 + y, 40, 44)
-        else:
-            self.idle.clip_composite_draw(frame_size * int(self.frame), 0, frame_size, self.idle.h, 0, 'h', self.x + 20 + x,
-                                     self.y + 22 + y, 40, 44)
-
-class ATTACK:
-    def enter(self, event):
-        self.frame = 0
-        self.fire_bullet()
-        print('ENTER ATTACK')
-    @staticmethod
-    def exit(self, event):
-        print('EXIT ATTACK')
-    @staticmethod
-    def do(self):
-        self.frame = (self.frame + FRAMES_PER_ACTION * ACTION_PER_TIME * game_framework.frame_time)
-        if int(self.frame) == self.frames['attack']:
-            self.cur_state.exit(self, None)
-            self.cur_state = IDLE
-            self.cur_state.enter(self, None)
-    @staticmethod
-    def draw(self, x, y):
-        frame_size = self.attack.w // self.frames['attack']
-        if self.dir == 1:
-            self.attack.clip_draw(frame_size * int(self.frame), 0, frame_size, self.idle.h, self.x + 20 + x,
-                                      self.y + 22 + y, 40, 44)
-        else:
-            self.attack.clip_composite_draw(frame_size * int(self.frame), 0, frame_size, self.idle.h, 0, 'h', self.x + 20 + x,
-                                     self.y + 22 + y, 40, 44)
 
 PIXEL_PER_METER = 40
 RUN_SPEED_MPS = 5
@@ -110,14 +62,54 @@ class Banshee(Monster_object.Monster):
         self.dir = 0
         self.frame = 0
         self.idletime = 0
+        self.statetimer = 0
+        self.attack_timer = 0
         self.cooltime = random.randint(3, 5)
         if Banshee.idle == None:
             Banshee.idle = load_image('./Resource/Banshee/BansheeIdle.png')
             Banshee.attack = load_image('./Resource/Banshee/BansheeAttack.png')
         self.idle = Banshee.idle
         self.attack = Banshee.attack
-        self.cur_state = IDLE
-        self.cur_state.enter(self, None)
+        self.state = 'idle'
+        self.build_behavior_tree()
+
+    def find_hero_attack(self):
+        distance2 = (play_state.hero.x - self.x) ** 2 + (play_state.hero.y - self.y) ** 2
+        if distance2 <= (PIXEL_PER_METER * 5) ** 2:
+            return BehaviorTree.SUCCESS
+        else:
+            return BehaviorTree.FAIL
+
+    def check_cooldown(self):
+        if self.attack_timer <= 0:
+            self.frame = 0
+            self.statetimer = self.frames['attack'] / (FRAMES_PER_ACTION * ACTION_PER_TIME)
+            self.set_dir()
+            return BehaviorTree.SUCCESS
+        return BehaviorTree.FAIL
+
+    def attack_hero(self):
+        self.state = 'attack'
+        self.statetimer -= game_framework.frame_time
+        if self.frame > 3.0 and self.attack_timer <= 0:
+            self.attack_timer = self.cooltime
+            self.fire_bullet()
+
+        if self.statetimer <= 0:
+            print('attack end')
+            self.state = 'idle'
+            return BehaviorTree.SUCCESS
+        else:
+            return BehaviorTree.RUNNING
+
+    def build_behavior_tree(self):
+        find_hero_node = LeafNode('Find Hero', self.find_hero_attack)
+        check_cooldown_node = LeafNode('Check Cooldown', self.check_cooldown)
+        attack_hero_node = LeafNode('Attack Hero', self.attack_hero)
+        attack_node = SequenceNode('Attack')
+        attack_node.add_children(find_hero_node, check_cooldown_node, attack_hero_node)
+
+        self.bt = BehaviorTree(attack_node)
 
     def get_bb(self):
         return self.x - 20, self.y - 22, self.x + 20, self.y + 22
@@ -141,8 +133,29 @@ class Banshee(Monster_object.Monster):
             pass
 
     def update(self):
-        self.cur_state.do(self)
+        self.frame = (self.frame + FRAMES_PER_ACTION * ACTION_PER_TIME * game_framework.frame_time) % self.frames[
+            self.state]
+        self.attack_timer -= game_framework.frame_time
+        self.bt.run()
 
     def draw(self, x, y):
-        self.cur_state.draw(self, x, y)
+        if self.state == 'attack':
+            frame_size = self.attack.w // self.frames['attack']
+            if self.dir == 1:
+                self.attack.clip_draw(frame_size * int(self.frame), 0, frame_size, self.idle.h, self.x + 20 + x,
+                                      self.y + 22 + y, 40, 44)
+            else:
+                self.attack.clip_composite_draw(frame_size * int(self.frame), 0, frame_size, self.idle.h, 0, 'h',
+                                                self.x + 20 + x,
+                                                self.y + 22 + y, 40, 44)
+        elif self.state == 'idle':
+            frame_size = self.idle.w // self.frames['idle']
+            if self.face_dir == 1:
+                self.idle.clip_draw(frame_size * int(self.frame), 0, frame_size, self.idle.h, self.x + 20 + x,
+                                    self.y + 22 + y, 40, 44)
+            else:
+                self.idle.clip_composite_draw(frame_size * int(self.frame), 0, frame_size, self.idle.h, 0, 'h',
+                                              self.x + 20 + x,
+                                              self.y + 22 + y, 40, 44)
+        # self.cur_state.draw(self, x, y)
         # draw_rectangle(self.x + x, self.y + y, self.x + 67 + x, self.y + 96 + y)
