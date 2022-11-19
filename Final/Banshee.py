@@ -27,6 +27,7 @@ class Banshee_Bullet:
         self.frame = 0
         self.frames = 4
         self.speed = 5
+        self.power = 10
 
     def draw(self, x, y):
         frame_size = self.image.w // self.frames
@@ -125,7 +126,7 @@ class Banshee(Monster_object.Monster):
         bullets.append(Banshee_Bullet(self.x, self.y, 0, 1))
         bullets.append(Banshee_Bullet(self.x, self.y, 0, -1))
         game_world.add_objects(bullets, 1)
-        game_world.add_collision_pairs(play_state.hero, bullets, 'hero:bullet')
+        game_world.add_collision_pairs(play_state.hero, bullets, 'hero:monster')
 
 
     def handle_collision(self, other, group):

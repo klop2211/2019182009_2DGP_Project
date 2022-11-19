@@ -108,14 +108,14 @@ def collide(a, b):
 def monster_spawn():
     if map.map_num == 0 and map.state < 3:
         game_world.add_objects(biggrayskuls, 1)
-        game_world.add_collision_pairs(hero, biggrayskuls, 'hero:biggrayskel')
+        game_world.add_collision_pairs(hero, biggrayskuls, 'hero:monster')
         game_world.add_collision_pairs(biggrayskuls, blocks, 'biggrayskel:block')
     if map.map_num == 1 and map.state < 3:
         game_world.add_objects(banshees, 1)
-        game_world.add_collision_pairs(hero, banshees, 'hero:banshee')
+        game_world.add_collision_pairs(hero, banshees, 'hero:monster')
     if map.map_num == 2 and map.state < 3:
         game_world.add_objects(chaindemons, 1)
-        game_world.add_collision_pairs(hero, chaindemons, 'hero:banshee')
+        game_world.add_collision_pairs(hero, chaindemons, 'hero:monster')
 
 def update():
     # hero.update(camera.x)

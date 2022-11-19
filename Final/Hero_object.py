@@ -204,6 +204,9 @@ class Hero:
         self.mouse_x = 0
         self.normal = [0, 0]
         self.fall = True
+        self.hp = 100
+        self.invincible = 0
+
 
     def move(self):
         self.x += self.dir * self.status['speed'] * PIXEL_PER_METER * game_framework.frame_time
@@ -219,7 +222,6 @@ class Hero:
                 self.y = clamp(other.top * 40, self.y, 660)
                 if self.cur_state != JUMP:
                     self.fall = True
-
             case 'hero:door':
                 if other.left < 20:
                     if play_state.map.state == 0 or play_state.map.state == 2:
@@ -242,6 +244,14 @@ class Hero:
                             self.x = clamp(40, self.x, 1160)
                     else:
                         self.x = clamp(40, self.x, 1160)
+            case 'hero:monster':
+                if self.invincible <= 0:
+                    print(self.hp)
+                    self.invincible = 2
+                    self.hp -= other.power
+
+
+
 
     def weapon_draw(self, x, y):
         width, height = self.weapon_image.w * 1.3, self.weapon_image.h * 1.3
@@ -290,6 +300,7 @@ class Hero:
 
     def update(self):
         self.cur_state.do(self)
+        self.invincible -= game_framework.frame_time
         self.y = min(680, self.y)
         # 중력
         self.y -= 10 * PIXEL_PER_METER * game_framework.frame_time

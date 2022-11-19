@@ -22,6 +22,7 @@ class Chaindemon_Bullet:
         self.x, self.y = x, y
         self.frame = 0
         self.frames = 7
+        self.power = 10
 
     def draw(self, x, y):
         frame_size = self.image.w // self.frames
@@ -139,7 +140,7 @@ class Chaindemon(Monster_object.Monster):
         bullets.append(Chaindemon_Bullet(self.x - 48 - 40, self.y + 39 + 40))
         bullets.append(Chaindemon_Bullet(self.x + 48 + 40, self.y - 39 - 40))
         game_world.add_objects(bullets, 1)
-        game_world.add_collision_pairs(play_state.hero, bullets, 'hero:bullet')
+        game_world.add_collision_pairs(play_state.hero, bullets, 'hero:monster')
 
     def fire_bullet2(self):
         bullets = []
@@ -152,7 +153,7 @@ class Chaindemon(Monster_object.Monster):
         bullets.append(Chaindemon_Bullet(self.x - 48 - 80, self.y + 39 + 80))
         bullets.append(Chaindemon_Bullet(self.x + 48 + 80, self.y - 39 - 80))
         game_world.add_objects(bullets, 1)
-        game_world.add_collision_pairs(play_state.hero, bullets, 'hero:bullet')
+        game_world.add_collision_pairs(play_state.hero, bullets, 'hero:monster')
 
     def handle_collision(self, other, group):
         if group == 'hero:chaindemon':
