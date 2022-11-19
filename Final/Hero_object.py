@@ -25,14 +25,12 @@ class IDLE:
     @staticmethod
     def enter(self, event):
         self.frame %= self.frames['idle']
-        print('ENTER IDLE')
         self.dir = 0
     @staticmethod
     def exit(self, event):
         if event == MOUSE_LD:
             self.attack()
-            print('attack')
-        print('EXIT IDLE')
+
     @staticmethod
     def do(self):
         self.frame = (self.frame + FRAMES_PER_ACTION * ACTION_PER_TIME * game_framework.frame_time) % self.frames['idle']
@@ -50,7 +48,6 @@ class RUN:
     @staticmethod
     def enter(self, event):
         self.frame %= self.frames['run']
-        print('ENTER RUN')
         if event == dD:
             self.dir += 1
         elif event == aD:
@@ -63,7 +60,6 @@ class RUN:
     def exit(self, event):
         if event == MOUSE_LD:
             self.attack()
-        print('EXIT RUN')
     @staticmethod
     def do(self):
         self.frame = (self.frame + FRAMES_PER_ACTION * ACTION_PER_TIME * game_framework.frame_time) % self.frames['run']
@@ -82,7 +78,6 @@ class JUMP:
     runtime = 0
     @staticmethod
     def enter(self, event):
-        print('ENTER JUMP')
         if event == dD:
             self.dir += 1
         elif event == aD:
@@ -91,17 +86,18 @@ class JUMP:
             self.dir -= 1
         elif event == aU:
             self.dir += 1
-        if event == SPACE and time.time() - JUMP.runtime > 0.3:
+        if event == SPACE and time.time() - JUMP.runtime > 0.3 and self.fall:
+            self.fall = False
             JUMP.runtime = time.time()
+
+
     @staticmethod
     def exit(self, event):
         if event == MOUSE_LD:
             self.attack()
-        print('EXIT JUMP')
     @staticmethod
     def do(self):
         self.y += PIXEL_PER_METER * game_framework.frame_time * (self.status['jump'] + 10)
-        print('do jump')
         self.move()
         if time.time() - JUMP.runtime > 0.3:
             if self.dir == 0:
@@ -125,7 +121,6 @@ class DASH:
     runtime = 0
     @staticmethod
     def enter(self, event):
-        print('ENTER DASH')
         if event == dD:
             self.dir += 1
         elif event == aD:
@@ -140,7 +135,6 @@ class DASH:
     def exit(self, event):
         if event == MOUSE_LD:
             self.attack()
-        print('EXIT DASH')
     @staticmethod
     def do(self):
         self.x += 10 * PIXEL_PER_METER * game_framework.frame_time * 5 * self.dir
@@ -209,6 +203,7 @@ class Hero:
         self.cur_state.enter(self, None)
         self.mouse_x = 0
         self.normal = [0, 0]
+        self.fall = True
 
     def move(self):
         self.x += self.dir * self.status['speed'] * PIXEL_PER_METER * game_framework.frame_time
@@ -222,6 +217,9 @@ class Hero:
                 self.x = clamp(40, self.x, 1160)
             case 'hero:block':
                 self.y = clamp(other.top * 40, self.y, 660)
+                if self.cur_state != JUMP:
+                    self.fall = True
+
             case 'hero:door':
                 if other.left < 20:
                     if play_state.map.state == 0 or play_state.map.state == 2:
