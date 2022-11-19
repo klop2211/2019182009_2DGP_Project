@@ -1,6 +1,7 @@
 import time
 
 import Banshee
+import chaindemon
 import game_framework
 import Camera
 import Map_object
@@ -30,7 +31,9 @@ doors = []
 check_col = None
 biggrayskuls = []
 banshees = []
+chaindemons = []
 spawn_timer = None
+
 
 def set_map():
     global map, walls, doors, blocks, check_col, minimap, biggrayskuls, spawn_timer
@@ -73,6 +76,12 @@ def enter():
     banshees.append(Banshee.Banshee(14 * 40, 11 * 40, 10))
     banshees.append(Banshee.Banshee(19 * 40, 14 * 40, 10))
     banshees.append(Banshee.Banshee(20 * 40, 8 * 40, 10))
+    chaindemons.append(chaindemon.Chaindemon(20 * 40, 4 * 40, 10))
+    chaindemons.append(chaindemon.Chaindemon(25 * 40, 9 * 40, 10))
+    chaindemons.append(chaindemon.Chaindemon(20 * 40, 16 * 40, 10))
+    chaindemons.append(chaindemon.Chaindemon(14 * 40, 8 * 40, 10))
+    chaindemons.append(chaindemon.Chaindemon(8 * 40, 15 * 40, 10))
+    chaindemons.append(chaindemon.Chaindemon(4 * 40, 11 * 40, 10))
     set_map()
     # walls = [Map_bb.Wall(*l) for l in wall_data[map.map_num]]
     # blocks = [Map_bb.Block(*l) for l in block_data[map.map_num]]
@@ -104,6 +113,9 @@ def monster_spawn():
     if map.map_num == 1 and map.state < 3:
         game_world.add_objects(banshees, 1)
         game_world.add_collision_pairs(hero, banshees, 'hero:banshee')
+    if map.map_num == 2 and map.state < 3:
+        game_world.add_objects(chaindemons, 1)
+        game_world.add_collision_pairs(hero, chaindemons, 'hero:banshee')
 
 def update():
     # hero.update(camera.x)
