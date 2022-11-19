@@ -125,7 +125,7 @@ class Banshee(Monster_object.Monster):
         bullets.append(Banshee_Bullet(self.x, self.y, 0, 1))
         bullets.append(Banshee_Bullet(self.x, self.y, 0, -1))
         game_world.add_objects(bullets, 1)
-        game_world.add_collision_pairs(play_state.hero, bullets, 'hero.bullet')
+        game_world.add_collision_pairs(play_state.hero, bullets, 'hero:bullet')
 
 
     def handle_collision(self, other, group):
