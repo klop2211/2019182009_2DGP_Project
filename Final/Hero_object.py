@@ -261,6 +261,13 @@ class Hero:
         if self.weapon_type == 1:
             bullet = Bullet.Bullet(self.x, self.y, self.normal[0], self.normal[1])
             game_world.add_object(bullet, 1)
+            if play_state.map.map_num == 1:
+                game_world.add_collision_pairs(bullet, play_state.banshees, 'bullet:banshee')
+            elif play_state.map.map_num == 0:
+                game_world.add_collision_pairs(bullet, play_state.biggrayskuls, 'bullet:biggrayskul')
+            elif play_state.map.map_num == 2:
+                game_world.add_collision_pairs(bullet, play_state.chaindemons, 'bullet:chaindemon')
+
 
     def set_normal(self, x, y):
         d = distance(x - self.x, y - self.y)
