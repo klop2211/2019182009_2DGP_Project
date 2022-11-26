@@ -53,7 +53,7 @@ class Biggrayskul(Monster):
 
     def find_hero_move(self):
         distance2 = (play_state.hero.x - self.x) ** 2 + (play_state.hero.y - self.y) ** 2
-        if distance2 <= (PIXEL_PER_METER * 4) ** 2:
+        if distance2 <= (PIXEL_PER_METER * 6) ** 2:
             self.set_dir()
             return BehaviorTree.SUCCESS
         else:
