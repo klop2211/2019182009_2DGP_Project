@@ -31,8 +31,11 @@ def all_object():
             yield object
 
 def clear():
-    for object in all_object():
-        remove_object(object)
+    for o in all_object():
+        del o
+    for layer in world:
+        layer.clear()
+
 
 def all_collision_pairs():
     for group, pairs in collision_group.items():

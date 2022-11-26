@@ -33,5 +33,5 @@ class Bullet:
         if self.y < 60 or self.y > 720:
             game_world.remove_object(self)
 
-    def handle_collision(self):
+    def handle_collision(self, other, group):
         pass
