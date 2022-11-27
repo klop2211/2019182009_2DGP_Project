@@ -1,7 +1,7 @@
 import time
 
-import Banshee
-import chaindemon
+import Banshee_object
+import Chaindemon_object
 import game_framework
 import Camera
 import Map_object
@@ -9,7 +9,8 @@ import UI_object
 import Hero_object
 import game_world
 import Map_bb
-import Monster_object
+
+import Biggrayskel_object
 from pico2d import *
 
 map = None
@@ -29,14 +30,14 @@ walls = []
 blocks = []
 doors = []
 check_col = None
-biggrayskuls = []
+biggrayskels = []
 banshees = []
 chaindemons = []
 spawn_timer = None
 
 
 def set_map():
-    global map, walls, doors, blocks, check_col, minimap, biggrayskuls, spawn_timer
+    global map, walls, doors, blocks, check_col, minimap, biggrayskels, spawn_timer
     minimap.num = map.map_num
     for o in walls:
         game_world.remove_collision_object(o)
@@ -51,37 +52,37 @@ def set_map():
     game_world.add_collision_pairs(hero, blocks, 'hero:block')
     game_world.add_collision_pairs(hero, doors, 'hero:door')
     spawn_timer = time.time()
-    for o in biggrayskuls:
+    for o in biggrayskels:
         game_world.remove_object(o)
     for o in banshees:
         game_world.remove_object(o)
 
 
 def enter():
-    global map, minimap, hero, back_ground, walls, doors, blocks, biggrayskuls, banshees
+    global map, minimap, hero, back_ground, walls, doors, blocks, biggrayskels, banshees
     check_col = True
     back_ground = load_image('./Resource\ice_tile\BGLayer_0 #218364.png')
     map = Map_object.Map()
     minimap = UI_object.Minimap(map.map_num)
     hero = Hero_object.Hero()
-    biggrayskuls.append(Monster_object.Biggrayskul(16 * 40, 2 * 40, 10))
-    biggrayskuls.append(Monster_object.Biggrayskul(7 * 40, 5 * 40, 10))
-    biggrayskuls.append(Monster_object.Biggrayskul(24 * 40, 8 * 40, 10))
-    biggrayskuls.append(Monster_object.Biggrayskul(17 * 40, 13 * 40, 10))
-    biggrayskuls.append(Monster_object.Biggrayskul(10 * 40, 12 * 40, 10))
-    banshees.append(Banshee.Banshee(6 * 40, 2 * 40, 10))
-    banshees.append(Banshee.Banshee(4 * 40, 10 * 40, 10))
-    banshees.append(Banshee.Banshee(10 * 40, 16 * 40, 10))
-    banshees.append(Banshee.Banshee(14 * 40, 5 * 40, 10))
-    banshees.append(Banshee.Banshee(14 * 40, 11 * 40, 10))
-    banshees.append(Banshee.Banshee(19 * 40, 14 * 40, 10))
-    banshees.append(Banshee.Banshee(20 * 40, 8 * 40, 10))
-    chaindemons.append(chaindemon.Chaindemon(20 * 40, 4 * 40, 10))
-    chaindemons.append(chaindemon.Chaindemon(25 * 40, 9 * 40, 10))
-    chaindemons.append(chaindemon.Chaindemon(20 * 40, 16 * 40, 10))
-    chaindemons.append(chaindemon.Chaindemon(14 * 40, 8 * 40, 10))
-    chaindemons.append(chaindemon.Chaindemon(8 * 40, 15 * 40, 10))
-    chaindemons.append(chaindemon.Chaindemon(4 * 40, 11 * 40, 10))
+    biggrayskels.append(Biggrayskel_object.Biggrayskel(16 * 40, 2 * 40, 10, 100, 3))
+    biggrayskels.append(Biggrayskel_object.Biggrayskel(7 * 40, 5 * 40, 10, 100, 3))
+    biggrayskels.append(Biggrayskel_object.Biggrayskel(24 * 40, 8 * 40, 10, 100, 3))
+    biggrayskels.append(Biggrayskel_object.Biggrayskel(17 * 40, 13 * 40, 10, 100, 3))
+    biggrayskels.append(Biggrayskel_object.Biggrayskel(10 * 40, 12 * 40, 10, 100, 3))
+    banshees.append(Banshee_object.Banshee(6 * 40, 2 * 40, 7, 100, 5))
+    banshees.append(Banshee_object.Banshee(4 * 40, 10 * 40, 7, 100, 5))
+    banshees.append(Banshee_object.Banshee(10 * 40, 16 * 40, 7, 100, 5))
+    banshees.append(Banshee_object.Banshee(14 * 40, 5 * 40, 7, 100, 5))
+    banshees.append(Banshee_object.Banshee(14 * 40, 11 * 40, 7, 100, 5))
+    banshees.append(Banshee_object.Banshee(19 * 40, 14 * 40, 7, 100, 5))
+    banshees.append(Banshee_object.Banshee(20 * 40, 8 * 40, 7, 100, 5))
+    chaindemons.append(Chaindemon_object.Chaindemon(20 * 40, 4 * 40, 12, 100, 7))
+    chaindemons.append(Chaindemon_object.Chaindemon(25 * 40, 9 * 40, 12, 100, 7))
+    chaindemons.append(Chaindemon_object.Chaindemon(20 * 40, 16 * 40, 12, 100, 7))
+    chaindemons.append(Chaindemon_object.Chaindemon(14 * 40, 8 * 40, 12, 100, 7))
+    chaindemons.append(Chaindemon_object.Chaindemon(8 * 40, 15 * 40, 12, 100, 7))
+    chaindemons.append(Chaindemon_object.Chaindemon(4 * 40, 11 * 40, 12, 100, 7))
     set_map()
     # walls = [Map_bb.Wall(*l) for l in wall_data[map.map_num]]
     # blocks = [Map_bb.Block(*l) for l in block_data[map.map_num]]
@@ -107,9 +108,9 @@ def collide(a, b):
 
 def monster_spawn():
     if map.map_num == 0 and map.state < 3:
-        game_world.add_objects(biggrayskuls, 1)
-        game_world.add_collision_pairs(hero, biggrayskuls, 'hero:monster')
-        game_world.add_collision_pairs(biggrayskuls, blocks, 'biggrayskel:block')
+        game_world.add_objects(biggrayskels, 1)
+        game_world.add_collision_pairs(hero, biggrayskels, 'hero:monster')
+        game_world.add_collision_pairs(biggrayskels, blocks, 'biggrayskel:block')
     if map.map_num == 1 and map.state < 3:
         game_world.add_objects(banshees, 1)
         game_world.add_collision_pairs(hero, banshees, 'hero:monster')
@@ -134,15 +135,17 @@ def update():
             a.handle_collision(b, group)
             b.handle_collision(a, group)
 
-def draw():
+
+def draw_world():
     global map, camera, minimap
-    clear_canvas()
     back_ground.clip_draw(0, 0, back_ground.w, back_ground.h, Camera.camera.x + 1200 // 2, Camera.camera.y + 800 // 2, 1200, 800)
     for object in game_world.all_object():
         object.draw(Camera.camera.x, Camera.camera.y)
-    # map.draw(camera.x, camera.y)
-    # minimap.draw(map.map_num)
-    # hero.draw(camera.x, camera.y)
+
+
+def draw():
+    clear_canvas()
+    draw_world()
     update_canvas()
     pass
 
