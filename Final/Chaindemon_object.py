@@ -3,6 +3,7 @@ import Monster_object
 import game_framework
 import game_world
 import play_state
+import Die_object
 from BehaviorTree import BehaviorTree, SelectorNode, SequenceNode, LeafNode
 import random
 PIXEL_PER_METER = 40
@@ -47,8 +48,8 @@ class Chaindemon(Monster_object.Monster):
     idle = None
     attack = None
 
-    def __init__(self, x, y, power):
-        self.x, self.y, self.power = x, y, power
+    def __init__(self, x, y, power, hp, defense):
+        self.x, self.y, self.power, self.hp, self.defense = x, y, power, hp, defense
         self.frames = {'idle': 6, 'attack': 2}
         self.face_dir = 1
         self.dir = 0
@@ -164,6 +165,10 @@ class Chaindemon(Monster_object.Monster):
             self.state]
         self.attack_timer -= game_framework.frame_time
         self.bt.run()
+        if self.hp <= 0:
+            game_world.add_object(Die_object.Die(self.x, self.y, 96, 78), 1)
+            game_world.remove_object(self)
+            play_state.chaindemons.remove(self)
 
     def draw(self, x, y):
         if self.state == 'attack':

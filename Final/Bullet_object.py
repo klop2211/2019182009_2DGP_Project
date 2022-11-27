@@ -9,10 +9,10 @@ RUN_SPEED_PPS = RUN_SPEED_MPS * PIXEL_PER_METER
 class Bullet:
     image = None
 
-    def __init__(self, x = 800, y = 300, dx = 0, dy = 0):
+    def __init__(self, x = 800, y = 300, dx = 0, dy = 0, power=0):
         if Bullet.image == None:
             Bullet.image = load_image('./Resource/Weapon/Bullet10.png')
-        self.x, self.y, self.dx, self.dy = x, y, dx, dy
+        self.x, self.y, self.dx, self.dy, self.power = x, y, dx, dy, power
         self.speed = 20
 
     def draw(self, x, y):
@@ -34,4 +34,7 @@ class Bullet:
             game_world.remove_object(self)
 
     def handle_collision(self, other, group):
-        pass
+        if group == 'bullet:monster':
+            other.hp -= max(self.power - other.defense, 0)
+            print(other.hp)
+            game_world.remove_object(self)
