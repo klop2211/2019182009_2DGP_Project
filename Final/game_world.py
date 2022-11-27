@@ -1,7 +1,7 @@
 # 0 back
 # 1 front
 
-world = [[], []]
+world = [[], [], []]
 collision_group = dict()
 
 def add_object(object, depth):
@@ -20,9 +20,9 @@ def remove_object(object):
 
 def remove_collision_object(o):
     for pairs in collision_group.values():
-        if o in pairs[0]:
+        while o in pairs[0]:
             pairs[0].remove(o)
-        if o in pairs[1]:
+        while o in pairs[1]:
             pairs[1].remove(o)
 
 def all_object():
