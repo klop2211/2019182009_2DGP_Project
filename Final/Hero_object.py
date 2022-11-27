@@ -1,7 +1,7 @@
 from pico2d import *
 
 import play_state
-import Bullet
+import Bullet_object
 import Camera
 import game_world
 import game_framework
@@ -205,6 +205,7 @@ class Hero:
         self.normal = [0, 0]
         self.fall = True
         self.hp = 100
+        self.power = 10
         self.invincible = 0
 
 
@@ -246,9 +247,9 @@ class Hero:
                         self.x = clamp(40, self.x, 1160)
             case 'hero:monster':
                 if self.invincible <= 0:
-                    print(self.hp)
-                    self.invincible = 2
+                    self.invincible = 1.5
                     self.hp -= other.power
+                    print(self.hp)
 
 
 
@@ -269,14 +270,14 @@ class Hero:
 
     def attack(self):
         if self.weapon_type == 1:
-            bullet = Bullet.Bullet(self.x, self.y, self.normal[0], self.normal[1])
+            bullet = Bullet_object.Bullet(self.x, self.y, self.normal[0], self.normal[1], self.power)
             game_world.add_object(bullet, 1)
             if play_state.map.map_num == 1:
-                game_world.add_collision_pairs(bullet, play_state.banshees, 'bullet:banshee')
+                game_world.add_collision_pairs(bullet, play_state.banshees, 'bullet:monster')
             elif play_state.map.map_num == 0:
-                game_world.add_collision_pairs(bullet, play_state.biggrayskuls, 'bullet:biggrayskul')
+                game_world.add_collision_pairs(bullet, play_state.biggrayskels, 'bullet:monster')
             elif play_state.map.map_num == 2:
-                game_world.add_collision_pairs(bullet, play_state.chaindemons, 'bullet:chaindemon')
+                game_world.add_collision_pairs(bullet, play_state.chaindemons, 'bullet:monster')
 
 
     def set_normal(self, x, y):
@@ -300,6 +301,7 @@ class Hero:
 
     def update(self):
         self.cur_state.do(self)
+        # 피격시 무적 시간
         self.invincible -= game_framework.frame_time
         self.y = min(680, self.y)
         # 중력
