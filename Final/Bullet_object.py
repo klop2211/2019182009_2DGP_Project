@@ -38,3 +38,8 @@ class Bullet:
             other.hp -= max(self.power - other.defense, 0)
             print(other.hp)
             game_world.remove_object(self)
+        if group == 'bullet:boss' and other.invincible <= 0:
+            other.hp -= max(self.power - other.defense, 0)
+            print(other.hp)
+            game_world.remove_object(self)
+

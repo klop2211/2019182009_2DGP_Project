@@ -2,6 +2,7 @@ import time
 
 import Banshee_object
 import Chaindemon_object
+import Niflheim_object
 import game_framework
 import Camera
 import Map_object
@@ -34,7 +35,8 @@ biggrayskels = []
 banshees = []
 chaindemons = []
 spawn_timer = None
-
+ice_pillars = []
+niflheim = None
 
 def set_map():
     global map, walls, doors, blocks, check_col, minimap, biggrayskels, spawn_timer
@@ -56,10 +58,12 @@ def set_map():
         game_world.remove_object(o)
     for o in banshees:
         game_world.remove_object(o)
+    for o in chaindemons:
+        game_world.remove_object(o)
 
 
 def enter():
-    global map, minimap, hero, back_ground, walls, doors, blocks, biggrayskels, banshees
+    global map, minimap, hero, back_ground, walls, doors, blocks, biggrayskels, banshees, niflheim
     check_col = True
     back_ground = load_image('./Resource\ice_tile\BGLayer_0 #218364.png')
     map = Map_object.Map()
@@ -83,6 +87,7 @@ def enter():
     chaindemons.append(Chaindemon_object.Chaindemon(14 * 40, 8 * 40, 12, 100, 7))
     chaindemons.append(Chaindemon_object.Chaindemon(8 * 40, 15 * 40, 12, 100, 7))
     chaindemons.append(Chaindemon_object.Chaindemon(4 * 40, 11 * 40, 12, 100, 7))
+    niflheim = Niflheim_object.Niflheim(600, 400, 15, 100, 10)
     set_map()
     # walls = [Map_bb.Wall(*l) for l in wall_data[map.map_num]]
     # blocks = [Map_bb.Block(*l) for l in block_data[map.map_num]]
@@ -117,6 +122,10 @@ def monster_spawn():
     if map.map_num == 2 and map.state < 3:
         game_world.add_objects(chaindemons, 1)
         game_world.add_collision_pairs(hero, chaindemons, 'hero:monster')
+    if map.map_num == 3 and map.state < 3:
+        game_world.add_object(niflheim, 1)
+        game_world.add_collision_pairs(hero, niflheim, 'hero:monster')
+
 
 def update():
     # hero.update(camera.x)

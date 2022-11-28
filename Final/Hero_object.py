@@ -205,7 +205,7 @@ class Hero:
         self.normal = [0, 0]
         self.fall = True
         self.hp = 100
-        self.power = 10
+        self.power = 50
         self.invincible = 0
 
 
@@ -278,6 +278,9 @@ class Hero:
                 game_world.add_collision_pairs(bullet, play_state.biggrayskels, 'bullet:monster')
             elif play_state.map.map_num == 2:
                 game_world.add_collision_pairs(bullet, play_state.chaindemons, 'bullet:monster')
+            elif play_state.map.map_num == 3:
+                game_world.add_collision_pairs(bullet, play_state.niflheim, 'bullet:boss')
+                game_world.add_collision_pairs(bullet, play_state.ice_pillars, 'bullet:monster')
 
 
     def set_normal(self, x, y):
@@ -303,6 +306,9 @@ class Hero:
         self.cur_state.do(self)
         # 피격시 무적 시간
         self.invincible -= game_framework.frame_time
+        if self.hp <= 0:
+            # to do: 게임 엔딩(게임 오버)
+            pass
         self.y = min(680, self.y)
         # 중력
         self.y -= 10 * PIXEL_PER_METER * game_framework.frame_time
