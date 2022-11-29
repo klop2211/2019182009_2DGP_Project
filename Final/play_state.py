@@ -87,7 +87,7 @@ def enter():
     chaindemons.append(Chaindemon_object.Chaindemon(14 * 40, 8 * 40, 12, 100, 7))
     chaindemons.append(Chaindemon_object.Chaindemon(8 * 40, 15 * 40, 12, 100, 7))
     chaindemons.append(Chaindemon_object.Chaindemon(4 * 40, 11 * 40, 12, 100, 7))
-    niflheim = Niflheim_object.Niflheim(600, 400, 15, 100, 10)
+    niflheim = Niflheim_object.Niflheim(600, 440, 15, 100, 10)
     set_map()
     # walls = [Map_bb.Wall(*l) for l in wall_data[map.map_num]]
     # blocks = [Map_bb.Block(*l) for l in block_data[map.map_num]]
