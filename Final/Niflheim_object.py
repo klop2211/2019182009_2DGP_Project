@@ -28,17 +28,19 @@ def rotate(x, y, rad):
 
 class Ice_Crystal:
     image = {}
+    enter_sound = None
 
     def __init__(self, x, y, power, delay):
         if not Ice_Crystal.image:
             Ice_Crystal.image['idle'] = load_image('./Resource/Niflheim/crystal/IceCrystalIdle.png')
             Ice_Crystal.image['enter'] = load_image('./Resource/Niflheim/crystal/IceCrystalEnter.png')
             Ice_Crystal.image['destroy'] = load_image('./Resource/Niflheim/crystal/IceCrystalDestroy.png')
+            Ice_Crystal.enter_sound = load_wav('./Resource/Audio/ice_crystal_attack.wav')
+            Ice_Crystal.enter_sound.set_volume(32)
         self.delay = delay
         self.w, self.h, = 93, 108
         self.x, self.y, self.power = x, y, power
         self.dy = -1
-
         self.state = 'enter'
         self.frames = {'enter': 16, 'idle': 1, 'destroy': 5}
         self.frame = 0
@@ -48,6 +50,7 @@ class Ice_Crystal:
             if self.state == 'enter':
                 self.frame = (self.frame + self.frames[self.state] * ACTION_PER_TIME * game_framework.frame_time)
                 if self.frame >= self.frames['enter']:
+                    Ice_Crystal.enter_sound.play(1)
                     self.frame = 0
                     self.state = 'idle'
             elif self.state == 'idle':
@@ -78,18 +81,19 @@ class Ice_Crystal:
 
 class Ice_Spear:
     image = {}
+    enter_sound = None
 
-    def __init__(self, x, y, dx, dy, power, delay):
+    def __init__(self, x, y, power, delay):
         if not Ice_Spear.image:
             Ice_Spear.image['idle'] = load_image('./Resource/Niflheim/spear/IceSpearIdle.png')
             Ice_Spear.image['enter'] = load_image('./Resource/Niflheim/spear/IceSpearEnter.png')
+            Ice_Spear.enter_sound = load_wav('./Resource/Audio/ice_spear_attack.wav')
+            Ice_Spear.enter_sound.set_volume(128)
         self.delay = delay
         self.w, self.h, = 50, 222
         self.x, self.y, self.power = x, y, power
-        self.dx, self.dy = normalize(dx - x, dy - y)
-        print(self.dx, self.dy)
+        self.dx, self.dy = normalize(play_state.hero.x - x, play_state.hero.y - y)
         self.dir = math.atan2(self.dy, self.dx)
-
         self.state = 'enter'
         self.frames = {'enter': 12, 'idle': 1}
         self.frame = 0
@@ -100,6 +104,9 @@ class Ice_Spear:
             if self.state == 'enter':
                 self.frame = (self.frame + self.frames[self.state] * ACTION_PER_TIME * game_framework.frame_time)
                 if self.frame >= self.frames['enter']:
+                    Ice_Spear.enter_sound.play(1)
+                    self.dx, self.dy = normalize(play_state.hero.x - self.x, play_state.hero.y - self.y)
+                    self.dir = math.atan2(self.dy, self.dx)
                     self.frame = 0
                     self.state = 'idle'
             else:
@@ -281,13 +288,12 @@ class Niflheim(Monster_object.Monster):
 
     def spawn_spear(self):
         spears = []
-        hx, hy = play_state.hero.x, play_state.hero.y
         self.cooltime['spear'] = 5
-        spears.append(Ice_Spear(7 * 40, 13 * 40, hx, hy, self.power, 0))
-        spears.append(Ice_Spear(11 * 40, 13 * 40, hx, hy, self.power, 0.5))
-        spears.append(Ice_Spear(15 * 40, 13 * 40, hx, hy, self.power, 1))
-        spears.append(Ice_Spear(19 * 40, 13 * 40, hx, hy, self.power, 1.5))
-        spears.append(Ice_Spear(23 * 40, 13 * 40, hx, hy, self.power, 2))
+        spears.append(Ice_Spear(7 * 40, 13 * 40, self.power, 0))
+        spears.append(Ice_Spear(11 * 40, 13 * 40, self.power, 0.5))
+        spears.append(Ice_Spear(15 * 40, 13 * 40, self.power, 1))
+        spears.append(Ice_Spear(19 * 40, 13 * 40, self.power, 1.5))
+        spears.append(Ice_Spear(23 * 40, 13 * 40, self.power, 2))
         game_world.add_objects(spears, 1)
         game_world.add_collision_pairs(play_state.hero, spears, 'hero:monster')
         self.delay = 2
