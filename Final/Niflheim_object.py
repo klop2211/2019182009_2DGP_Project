@@ -146,13 +146,15 @@ class Ice_Spear:
 
 class Ice_Pillar:
     image = {}
-    # w: 112, h: 44
+    enter_sound = None
 
     def __init__(self, dx, dy, dir, hp):
         if not Ice_Pillar.image:
             Ice_Pillar.image['idle'] = load_image('./Resource/Niflheim/pillar/IcePillarIdle.png')
             Ice_Pillar.image['destroy'] = load_image('./Resource/Niflheim/pillar/IcePillarDestroyFX.png')
             Ice_Pillar.image['enter'] = load_image('./Resource/Niflheim/pillar/IcePillarEnter.png')
+            Ice_Pillar.enter_sound = load_wav('./Resource/Audio/ice_pillar_spawn.wav')
+            Ice_Pillar.enter_sound.set_volume(25)
 
         self.w, self.h, = 112, 44
         self.x, self.y, self.dir, self.hp = play_state.niflheim.x + dx, play_state.niflheim.y + dy, dir, hp
@@ -161,6 +163,7 @@ class Ice_Pillar:
         self.frames = {'enter': 20, 'destroy': 3, 'idle': 1}
         self.frame = 0
         self.defense = 0
+        Ice_Pillar.enter_sound.play(1)
 
     def update(self):
         self.x, self.y = play_state.niflheim.x + self.dx, play_state.niflheim.y + self.dy
@@ -288,12 +291,27 @@ class Niflheim(Monster_object.Monster):
 
     def spawn_spear(self):
         spears = []
-        self.cooltime['spear'] = 5
-        spears.append(Ice_Spear(7 * 40, 13 * 40, self.power, 0))
-        spears.append(Ice_Spear(11 * 40, 13 * 40, self.power, 0.5))
-        spears.append(Ice_Spear(15 * 40, 13 * 40, self.power, 1))
-        spears.append(Ice_Spear(19 * 40, 13 * 40, self.power, 1.5))
-        spears.append(Ice_Spear(23 * 40, 13 * 40, self.power, 2))
+        self.cooltime['spear'] = 7
+        match random.randint(0, 2):
+            case 0:
+                spears.append(Ice_Spear(7 * 40, 13 * 40, self.power, 0))
+                spears.append(Ice_Spear(11 * 40, 13 * 40, self.power, 0.5))
+                spears.append(Ice_Spear(15 * 40, 13 * 40, self.power, 1))
+                spears.append(Ice_Spear(19 * 40, 13 * 40, self.power, 1.5))
+                spears.append(Ice_Spear(23 * 40, 13 * 40, self.power, 2))
+            case 1:
+                spears.append(Ice_Spear(7 * 40, 13 * 40, self.power, 0))
+                spears.append(Ice_Spear(11 * 40, 13 * 40, self.power, 0.2))
+                spears.append(Ice_Spear(15 * 40, 13 * 40, self.power, 0.4))
+                spears.append(Ice_Spear(19 * 40, 13 * 40, self.power, 0.6))
+                spears.append(Ice_Spear(23 * 40, 13 * 40, self.power, 0.8))
+            case 2:
+                spears.append(Ice_Spear(7 * 40, 13 * 40, self.power, 0))
+                spears.append(Ice_Spear(11 * 40, 13 * 40, self.power, 0))
+                spears.append(Ice_Spear(15 * 40, 13 * 40, self.power, 0))
+                spears.append(Ice_Spear(19 * 40, 13 * 40, self.power, 0))
+                spears.append(Ice_Spear(23 * 40, 13 * 40, self.power, 0))
+
         game_world.add_objects(spears, 1)
         game_world.add_collision_pairs(play_state.hero, spears, 'hero:monster')
         self.delay = 2
@@ -314,12 +332,26 @@ class Niflheim(Monster_object.Monster):
 
     def spawn_crystal(self):
         crystals = []
-        self.cooltime['crystal'] = 5
-        for i in range(1, 26, 3):
-            if i % 2:
-                crystals.append(Ice_Crystal(i * 40, 16 * 40, self.power, 0))
-            else:
-                crystals.append(Ice_Crystal(i * 40, 16 * 40, self.power, 1))
+        self.cooltime['crystal'] = 7
+        match random.randint(0, 2):
+            case 0:
+                for i in range(1, 26, 3):
+                    if i % 2:
+                        crystals.append(Ice_Crystal(i * 40, 16 * 40, self.power, 0))
+                    else:
+                        crystals.append(Ice_Crystal(i * 40, 16 * 40, self.power, 1))
+            case 1:
+                for i in range(1, 26, 3):
+                    crystals.append(Ice_Crystal(i * 40, 16 * 40, self.power, i // 3 / 3))
+            case 2:
+                for i in range(1, 26, 3):
+                    if i > 15:
+                        crystals.append(Ice_Crystal(i * 40, 16 * 40, self.power, 1))
+                    else:
+                        crystals.append(Ice_Crystal(i * 40, 16 * 40, self.power, 0))
+
+
+
         game_world.add_objects(crystals, 1)
         game_world.add_collision_pairs(play_state.hero, crystals, 'hero:monster')
         self.delay = 2
