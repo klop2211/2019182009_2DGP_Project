@@ -1,3 +1,5 @@
+import random
+
 from pico2d import *
 import Monster_object
 import game_world
@@ -5,6 +7,10 @@ import play_state
 from BehaviorTree import BehaviorTree, SelectorNode, SequenceNode, LeafNode
 import game_framework
 import math
+
+PIXEL_PER_METER = 40
+RUN_SPEED_MPS = 5
+RUN_SPEED_PPS = RUN_SPEED_MPS * PIXEL_PER_METER
 
 TIME_PER_ACTION = 1
 ACTION_PER_TIME = 1.0 / TIME_PER_ACTION
@@ -18,6 +24,56 @@ def normalize(x, y):
 
 def rotate(x, y, rad):
     return x * math.cos(rad) - y * math.sin(rad), x * math.sin(rad) + y * math.cos(rad)
+
+
+class Ice_Crystal:
+    image = {}
+
+    def __init__(self, x, y, power, delay):
+        if not Ice_Crystal.image:
+            Ice_Crystal.image['idle'] = load_image('./Resource/Niflheim/crystal/IceCrystalIdle.png')
+            Ice_Crystal.image['enter'] = load_image('./Resource/Niflheim/crystal/IceCrystalEnter.png')
+            Ice_Crystal.image['destroy'] = load_image('./Resource/Niflheim/crystal/IceCrystalDestroy.png')
+        self.delay = delay
+        self.w, self.h, = 93, 108
+        self.x, self.y, self.power = x, y, power
+        self.dy = -1
+
+        self.state = 'enter'
+        self.frames = {'enter': 16, 'idle': 1, 'destroy': 5}
+        self.frame = 0
+
+    def update(self):
+        if self.delay <= 0:
+            if self.state == 'enter':
+                self.frame = (self.frame + self.frames[self.state] * ACTION_PER_TIME * game_framework.frame_time)
+                if self.frame >= self.frames['enter']:
+                    self.frame = 0
+                    self.state = 'idle'
+            elif self.state == 'idle':
+                self.y += self.dy * 20 * PIXEL_PER_METER * game_framework.frame_time
+            else:
+                self.frame = (self.frame + self.frames[self.state] * 3 * game_framework.frame_time)
+                if self.frame >= self.frames['destroy']:
+                    game_world.remove_object(self)
+            if self.y < 80:
+                self.state = 'destroy'
+        else:
+            self.delay -= game_framework.frame_time
+
+    def get_bb(self):
+        return self.x, self.y, self.x + self.w, self.y + self.h
+
+    def handle_collision(self, other, group):
+        if self.state == 'idle':
+            self.state = 'destroy'
+
+    def draw(self, c_x, c_y):
+        sx, sy = self.x + c_x, self.y + c_y
+        frame_size = Ice_Crystal.image[self.state].w // self.frames[self.state]
+        Ice_Crystal.image[self.state].clip_draw(frame_size * int(self.frame), 0, frame_size,
+                                                        Ice_Crystal.image[self.state].h,
+                                                        sx + self.w // 2, sy + self.h // 2, self.w, self.h)
 
 
 class Ice_Spear:
@@ -47,8 +103,8 @@ class Ice_Spear:
                     self.frame = 0
                     self.state = 'idle'
             else:
-                self.x += self.dx
-                self.y += self.dy
+                self.x += self.dx * 20 * PIXEL_PER_METER * game_framework.frame_time
+                self.y += self.dy * 20 * PIXEL_PER_METER * game_framework.frame_time
             if self.x < -100 or self.x > 1300 or self.y < -100 or self.y > 900:
                 game_world.remove_object(self)
 
@@ -85,28 +141,32 @@ class Ice_Pillar:
     image = {}
     # w: 112, h: 44
 
-    def __init__(self, x, y, dir, hp):
+    def __init__(self, dx, dy, dir, hp):
         if not Ice_Pillar.image:
             Ice_Pillar.image['idle'] = load_image('./Resource/Niflheim/pillar/IcePillarIdle.png')
             Ice_Pillar.image['destroy'] = load_image('./Resource/Niflheim/pillar/IcePillarDestroyFX.png')
             Ice_Pillar.image['enter'] = load_image('./Resource/Niflheim/pillar/IcePillarEnter.png')
 
         self.w, self.h, = 112, 44
-        self.x, self.y, self.dir, self.hp = x, y, dir, hp
+        self.x, self.y, self.dir, self.hp = play_state.niflheim.x + dx, play_state.niflheim.y + dy, dir, hp
+        self.dx, self.dy = dx, dy
         self.state = 'enter'
         self.frames = {'enter': 20, 'destroy': 3, 'idle': 1}
         self.frame = 0
         self.defense = 0
 
     def update(self):
-        if self.state != 'idle':
+        self.x, self.y = play_state.niflheim.x + self.dx, play_state.niflheim.y + self.dy
+        if self.state == 'enter':
             self.frame = (self.frame + self.frames[self.state] * ACTION_PER_TIME * game_framework.frame_time)
-        if self.state == 'enter' and self.frame >= self.frames['enter']:
-            self.frame = 0
-            self.state = 'idle'
-        if self.state == 'destroy' and self.frame >= self.frames['destroy']:
-            game_world.remove_object(self)
-            play_state.ice_pillars.remove(self)
+            if self.frame >= self.frames['enter']:
+                self.frame = 0
+                self.state = 'idle'
+        if self.state == 'destroy':
+            self.frame = (self.frame + self.frames[self.state] * 3 * game_framework.frame_time)
+            if self.frame >= self.frames['destroy']:
+                game_world.remove_object(self)
+                play_state.ice_pillars.remove(self)
         if self.hp <= 0 and self.state != 'destroy':
             self.state = 'destroy'
 
@@ -144,18 +204,24 @@ class Niflheim(Monster_object.Monster):
         self.frames = {'idle': 6, 'attack': 11, 'die': 30, 'enter': 16}
         self.frame = 0
         self.dir = 1
+        self.dx, self.dy = 0, 0
         self.state = 'enter'
         self.invincible = 0
         self.cooltime = {'pillar': 0, 'spear': 5, 'crystal': 5}
+        self.delay = 0
         self.build_behavior_tree()
 
     def update(self):
+        self.x += self.dx * 20 * PIXEL_PER_METER * game_framework.frame_time
+        self.y += self.dy * 20 * PIXEL_PER_METER * game_framework.frame_time
+        self.delay -= game_framework.frame_time
         for k, v in self.cooltime.items():
             self.cooltime[k] -= game_framework.frame_time
         self.frame = (self.frame + self.frames[self.state] * ACTION_PER_TIME * game_framework.frame_time)
         if self.state == 'idle':
             self.frame %= self.frames[self.state]
-            self.bt.run()
+            if self.delay <= 0:
+                self.bt.run()
         if self.state == 'enter' and self.frame >= self.frames['enter']:
             self.frame = 0
             self.state = 'idle'
@@ -164,7 +230,6 @@ class Niflheim(Monster_object.Monster):
             # to do: 게임 엔딩(클리어)
         if self.hp <= 0 and self.state != 'die':
             self.state = 'die'
-
 
     def draw(self, x, y):
         sx, sy = self.x + x, self.y + y
@@ -177,6 +242,8 @@ class Niflheim(Monster_object.Monster):
                                                  self.w, self.h)
 
     def get_bb(self):
+        if play_state.ice_pillars:
+            return 0, 0, 0, 0
         return self.x - self.w // 2, self.y - self.h // 2, self.x + self.w // 2, self.y + self.h // 2
 
     def handle_collision(self, other, group):
@@ -188,19 +255,23 @@ class Niflheim(Monster_object.Monster):
         return BehaviorTree.FAIL
 
     def move_center(self):
-        self.x, self.y = 600, 440
-        return BehaviorTree.SUCCESS
+        if clamp(590, self.x, 610) == self.x and clamp(430, self.y, 450) == self.y:
+            self.dx, self.dy = 0, 0
+            return BehaviorTree.SUCCESS
+        self.dx, self.dy = normalize(600 - self.x, 440 - self.y)
+        return BehaviorTree.RUNNING
 
     def spawn_pillar(self):
         for o in play_state.ice_pillars:
             game_world.remove_object(o)
         play_state.ice_pillars.clear()
         self.cooltime['pillar'] = 10
-        play_state.ice_pillars.append(Ice_Pillar(self.x - self.w - 20, self.y, 90, 100))
-        play_state.ice_pillars.append(Ice_Pillar(self.x + self.w - 20, self.y, 90, 100))
-        play_state.ice_pillars.append(Ice_Pillar(self.x - 20, self.y - self.h, 0, 100))
-        play_state.ice_pillars.append(Ice_Pillar(self.x - 20, self.y + self.h, 0, 100))
+        play_state.ice_pillars.append(Ice_Pillar(- self.w - 20, 0, 90, 100))
+        play_state.ice_pillars.append(Ice_Pillar(self.w - 20, 0, 90, 100))
+        play_state.ice_pillars.append(Ice_Pillar(- 20, - self.h, 0, 100))
+        play_state.ice_pillars.append(Ice_Pillar(- 20, + self.h, 0, 100))
         game_world.add_objects(play_state.ice_pillars, 1)
+        self.delay = 2
         return BehaviorTree.SUCCESS
 
     def check_cooldown_spear(self):
@@ -211,7 +282,7 @@ class Niflheim(Monster_object.Monster):
     def spawn_spear(self):
         spears = []
         hx, hy = play_state.hero.x, play_state.hero.y
-        self.cooltime['spear'] = 7
+        self.cooltime['spear'] = 5
         spears.append(Ice_Spear(7 * 40, 13 * 40, hx, hy, self.power, 0))
         spears.append(Ice_Spear(11 * 40, 13 * 40, hx, hy, self.power, 0.5))
         spears.append(Ice_Spear(15 * 40, 13 * 40, hx, hy, self.power, 1))
@@ -219,7 +290,53 @@ class Niflheim(Monster_object.Monster):
         spears.append(Ice_Spear(23 * 40, 13 * 40, hx, hy, self.power, 2))
         game_world.add_objects(spears, 1)
         game_world.add_collision_pairs(play_state.hero, spears, 'hero:monster')
+        self.delay = 2
         return BehaviorTree.SUCCESS
+
+    def check_cooldown_crystal(self):
+        if self.cooltime['crystal'] <= 0:
+            return BehaviorTree.SUCCESS
+        return BehaviorTree.FAIL
+
+    def move_left(self):
+        self.dx, self.dy = normalize(4 * 40 - self.x, 15 * 40 - self.y)
+        self.dir = -1
+        if clamp(4 * 40 - 10, self.x, 4 * 40 + 10) == self.x and clamp(15 * 40 - 10, self.y, 15 * 40 + 10) == self.y:
+            self.dx, self.dy = 0, 0
+            return BehaviorTree.SUCCESS
+        return BehaviorTree.RUNNING
+
+    def spawn_crystal(self):
+        crystals = []
+        self.cooltime['crystal'] = 5
+        for i in range(1, 26, 3):
+            if i % 2:
+                crystals.append(Ice_Crystal(i * 40, 16 * 40, self.power, 0))
+            else:
+                crystals.append(Ice_Crystal(i * 40, 16 * 40, self.power, 1))
+        game_world.add_objects(crystals, 1)
+        game_world.add_collision_pairs(play_state.hero, crystals, 'hero:monster')
+        self.delay = 2
+        return BehaviorTree.SUCCESS
+
+    def move_right(self):
+        self.dx, self.dy = normalize(26 * 40 - self.x, 15 * 40 - self.y)
+        self.dir = 1
+        if clamp(26 * 40 - 10, self.x, 26 * 40 + 10) == self.x and clamp(15 * 40 - 10, self.y, 15 * 40 + 10) == self.y:
+            self.dx, self.dy = 0, 0
+            return BehaviorTree.SUCCESS
+        return BehaviorTree.RUNNING
+
+    def move_random(self):
+        if self.dx != 0:
+            if self.dir == 1:
+                return self.move_right()
+            else:
+                return self.move_left()
+        if random.randint(0, 1):
+            return self.move_right()
+        else:
+            return self.move_left()
 
     def build_behavior_tree(self):
         check_cooldown_pillar_node = LeafNode('Check_Cooldown_Pillar', self.check_cooldown_pillar)
@@ -228,13 +345,19 @@ class Niflheim(Monster_object.Monster):
         pillar_node = SequenceNode('Pillar')
         pillar_node.add_children(check_cooldown_pillar_node, move_center_node, spawn_pillar_node)
 
-        check_cooldown_spear_node = LeafNode('Check_Cooldown_Pillar', self.check_cooldown_spear)
-        spawn_spear_node = LeafNode('Spawn_Pillar', self.spawn_spear)
-        spear_node = SequenceNode('Pillar')
-        spear_node.add_children(check_cooldown_spear_node, move_center_node, spawn_spear_node)
+        check_cooldown_spear_node = LeafNode('Check_Cooldown_Spear', self.check_cooldown_spear)
+        spawn_spear_node = LeafNode('Spawn_Spear', self.spawn_spear)
+        move_random_node = LeafNode('Move_Random', self.move_random)
+        spear_node = SequenceNode('Spear')
+        spear_node.add_children(check_cooldown_spear_node, move_random_node, spawn_spear_node)
+
+        check_cooldown_crystal_node = LeafNode('Check_Cooldown_Crystal', self.check_cooldown_crystal)
+        spawn_crystal_node = LeafNode('Spawn_Crystal', self.spawn_crystal)
+        crystal_node = SequenceNode('Crystal')
+        crystal_node.add_children(check_cooldown_crystal_node, move_random_node, spawn_crystal_node)
 
         root_node = SelectorNode('Root')
-        root_node.add_children(pillar_node, spear_node)
+        root_node.add_children(pillar_node, spear_node, crystal_node)
         self.bt = BehaviorTree(root_node)
 
     # to do: 인공지능 완성하기

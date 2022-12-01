@@ -11,9 +11,10 @@ exitbutton = None
 main_logo = None
 back_cloud = None
 cloud_x = 0
+bgm = None
 
 def enter():
-    global back_ground, startbutton, exitbutton, main_logo, back_cloud
+    global back_ground, startbutton, exitbutton, main_logo, back_cloud, bgm
     back_ground = load_image('./Resource/UI/BGLayer_0.png')
     main_logo = load_image('./Resource/UI/MainLogo.png')
     back_cloud = load_image('./Resource/UI/BackCloud.png')
@@ -21,7 +22,9 @@ def enter():
     exitbutton = UI_object.Exitbutton()
     game_world.add_object(startbutton, 1)
     game_world.add_object(exitbutton, 1)
-    pass
+    bgm = load_music('./Resource/Audio/0.Town.mp3')
+    bgm.set_volume(32)
+    bgm.repeat_play()
 
 
 def update():

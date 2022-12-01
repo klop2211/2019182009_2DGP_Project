@@ -27,8 +27,9 @@ class Map:
         self.block_right = load_image('./Resource\ice_tile\Ice_OnewayR.png')
         # 0 : enter, 1 : lock, 2 : clear
         self.state = 0
-        self.map_num = 0
-
+        self.map_num = 3
+        self.boss_bgm = load_music('./Resource/Audio/2.IceBoss.mp3')
+        self.normal_bgm = load_music('./Resource/Audio/2.IceField.mp3')
 
         # 발판의 위치를 x1, x2, y 순으로 가진 리스트, map_num를 통해 맵을 변경 1/40으로 축소 되있음
         self.block_info = [((5, 9, 4), (10, 14, 7), (7, 11, 11), (11, 15, 15), (16, 18, 12), (19, 21, 10), (21, 25, 7)),

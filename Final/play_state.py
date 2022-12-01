@@ -54,6 +54,13 @@ def set_map():
     game_world.add_collision_pairs(hero, blocks, 'hero:block')
     game_world.add_collision_pairs(hero, doors, 'hero:door')
     spawn_timer = time.time()
+    if map.map_num == 3:
+        map.boss_bgm.set_volume(32)
+        map.boss_bgm.repeat_play()
+    else:
+        map.normal_bgm.set_volume(32)
+        map.normal_bgm.repeat_play()
+
     for o in biggrayskels:
         game_world.remove_object(o)
     for o in banshees:
@@ -64,7 +71,6 @@ def set_map():
 
 def enter():
     global map, minimap, hero, back_ground, walls, doors, blocks, biggrayskels, banshees, niflheim
-    check_col = True
     back_ground = load_image('./Resource\ice_tile\BGLayer_0 #218364.png')
     map = Map_object.Map()
     minimap = UI_object.Minimap(map.map_num)
