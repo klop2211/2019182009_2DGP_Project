@@ -47,7 +47,7 @@ class Chaindemon_Bullet:
 class Chaindemon(Monster_object.Monster):
     idle = None
     attack = None
-
+    sound_attack = None
     def __init__(self, x, y, power, hp, defense):
         self.x, self.y, self.power, self.hp, self.defense = x, y, power, hp, defense
         self.frames = {'idle': 6, 'attack': 2}
@@ -61,6 +61,8 @@ class Chaindemon(Monster_object.Monster):
         if Chaindemon.idle == None:
             Chaindemon.idle = load_image('./Resource/Chaindemon/ChainDemon.png')
             Chaindemon.attack = load_image('./Resource/Chaindemon/ChainDemonAttack.png')
+            Chaindemon.sound_attack = load_wav('./Resource/Audio/chaindemon_attack.wav')
+            Chaindemon.sound_attack.set_volume(100)
         self.idle = Chaindemon.idle
         self.attack = Chaindemon.attack
         self.state = 'idle'
@@ -132,6 +134,7 @@ class Chaindemon(Monster_object.Monster):
 
     def fire_bullet(self):
         bullets = []
+        Chaindemon.sound_attack.play(1)
         bullets.append(Chaindemon_Bullet(self.x - 48 - 40, self.y - 39 - 40))
         bullets.append(Chaindemon_Bullet(self.x, self.y - 39 - 40))
         bullets.append(Chaindemon_Bullet(self.x - 48 - 40, self.y))
@@ -145,6 +148,7 @@ class Chaindemon(Monster_object.Monster):
 
     def fire_bullet2(self):
         bullets = []
+        Chaindemon.sound_attack.play(1)
         bullets.append(Chaindemon_Bullet(self.x - 48 - 80, self.y - 39 - 80))
         bullets.append(Chaindemon_Bullet(self.x, self.y - 39 - 80))
         bullets.append(Chaindemon_Bullet(self.x - 48 - 80, self.y))

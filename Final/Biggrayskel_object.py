@@ -20,7 +20,7 @@ class Biggrayskel(Monster_object.Monster):
     attack = None
     move = None
     skill = None
-
+    sound_attack = None
     def __init__(self, x, y, power, hp, defense):
         self.x, self.y, self.power, self.hp, self.defense = x, y, power, hp, defense
         self.frames = {'idle': 8, 'attack': 13, 'move': 6, 'skill': 13}
@@ -32,6 +32,8 @@ class Biggrayskel(Monster_object.Monster):
             Biggrayskel.attack = load_image('./Resource/BigGrayIceSkel/BigGrayIceSkelAttack.png')
             Biggrayskel.move = load_image('./Resource/BigGrayIceSkel/BigGrayIceSkelMove.png')
             Biggrayskel.skill = load_image('./Resource/BigGrayIceSkel/BigGrayIceSkelSkill.png')
+            Biggrayskel.sound_attack = load_wav('./Resource/Audio/swing0.wav')
+            Biggrayskel.sound_attack.set_volume(32)
         self.idle = Biggrayskel.idle
         self.attack = Biggrayskel.attack
         self.move = Biggrayskel.move
@@ -40,8 +42,7 @@ class Biggrayskel(Monster_object.Monster):
         self.cooltime = {'attack': 13 / (FRAMES_PER_ACTION * ACTION_PER_TIME), 'skill': 13 / (FRAMES_PER_ACTION * ACTION_PER_TIME)}
         self.timer = self.cooltime['attack']
         self.build_behavior_tree()
-        # self.cur_state = IDLE
-        # self.cur_state.enter(self, None)
+
 
     def find_hero_move(self):
         distance2 = (play_state.hero.x - self.x) ** 2 + (play_state.hero.y - self.y) ** 2
@@ -63,6 +64,7 @@ class Biggrayskel(Monster_object.Monster):
             self.frame = 0
             self.set_dir()
             self.timer = self.cooltime['attack']
+            Biggrayskel.sound_attack.play(1)
             return BehaviorTree.SUCCESS
         else:
             return BehaviorTree.FAIL
@@ -71,7 +73,6 @@ class Biggrayskel(Monster_object.Monster):
         self.state = 'attack'
         self.timer -= game_framework.frame_time
         if self.timer <= 0:
-            print('attack end')
             self.state = 'idle'
             return BehaviorTree.SUCCESS
         else:

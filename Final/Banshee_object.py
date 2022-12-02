@@ -55,7 +55,7 @@ class Banshee_Bullet:
 class Banshee(Monster_object.Monster):
     idle = None
     attack = None
-
+    sound_attack = None
 
     def __init__(self, x, y, power, hp, defense = 2):
         self.x, self.y, self.power, self.hp, self.defense = x, y, power, hp, defense
@@ -70,6 +70,8 @@ class Banshee(Monster_object.Monster):
         if Banshee.idle == None:
             Banshee.idle = load_image('./Resource/Banshee/BansheeIdle.png')
             Banshee.attack = load_image('./Resource/Banshee/BansheeAttack.png')
+            Banshee.sound_attack = load_wav('./Resource/Audio/BansheeAttack_pre.wav')
+            Banshee.sound_attack.set_volume(100)
         self.idle = Banshee.idle
         self.attack = Banshee.attack
         self.state = 'idle'
@@ -96,7 +98,6 @@ class Banshee(Monster_object.Monster):
         if self.frame > 3.0 and self.attack_timer <= 0:
             self.attack_timer = self.cooltime
             self.fire_bullet()
-
         if self.statetimer <= 0:
             print('attack end')
             self.state = 'idle'
@@ -118,6 +119,7 @@ class Banshee(Monster_object.Monster):
 
     def fire_bullet(self):
         bullets =[]
+        Banshee.sound_attack.play(1)
         bullets.append(Banshee_Bullet(self.x, self.y, -math.sqrt(0.5), -math.sqrt(0.5)))
         bullets.append(Banshee_Bullet(self.x, self.y, -1, 1))
         bullets.append(Banshee_Bullet(self.x, self.y, -1, 0))
