@@ -42,6 +42,8 @@ class Biggrayskel(Monster_object.Monster):
         self.cooltime = {'attack': 13 / (FRAMES_PER_ACTION * ACTION_PER_TIME), 'skill': 13 / (FRAMES_PER_ACTION * ACTION_PER_TIME)}
         self.timer = self.cooltime['attack']
         self.build_behavior_tree()
+        self.hp_back = load_image('./Resource/UI/hp_back.png')
+        self.hp_bar = load_image('./Resource/UI/hp_bar.png')
 
 
     def find_hero_move(self):

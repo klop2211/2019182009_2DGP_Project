@@ -76,6 +76,8 @@ class Banshee(Monster_object.Monster):
         self.attack = Banshee.attack
         self.state = 'idle'
         self.build_behavior_tree()
+        self.hp_back = load_image('./Resource/UI/hp_back.png')
+        self.hp_bar = load_image('./Resource/UI/hp_bar.png')
 
     def find_hero_attack(self):
         distance2 = (play_state.hero.x - self.x) ** 2 + (play_state.hero.y - self.y) ** 2

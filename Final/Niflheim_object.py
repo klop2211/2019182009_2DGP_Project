@@ -158,11 +158,14 @@ class Ice_Pillar:
 
         self.w, self.h, = 112, 44
         self.x, self.y, self.dir, self.hp = play_state.niflheim.x + dx, play_state.niflheim.y + dy, dir, hp
+        print(hp)
         self.dx, self.dy = dx, dy
         self.state = 'enter'
         self.frames = {'enter': 20, 'destroy': 3, 'idle': 1}
         self.frame = 0
         self.defense = 0
+        self.hp_back = load_image('./Resource/UI/hp_back.png')
+        self.hp_bar = load_image('./Resource/UI/hp_bar.png')
         Ice_Pillar.enter_sound.play(1)
 
     def update(self):
@@ -183,9 +186,16 @@ class Ice_Pillar:
     def draw(self, c_x, c_y):
         sx, sy = self.x + c_x, self.y + c_y
         frame_size = Ice_Pillar.image[self.state].w // self.frames[self.state]
+
         if self.dir == 0:
+            self.hp_back.draw(sx + self.w // 2, sy + self.h // 2 - 40)
+            self.hp_bar.draw(sx + self.w // 2 + 1 - int(self.hp_bar.w // 2 * (100 - self.hp) / 100), sy + self.h // 2 - 1 - 40, int(self.hp_bar.w * self.hp / 100),
+                             self.hp_bar.h)
             Ice_Pillar.image[self.state].clip_draw(frame_size * int(self.frame), 0, frame_size, Ice_Pillar.image[self.state].h, sx + self.w // 2, sy + self.h // 2, self.w, self.h)
         else:
+            self.hp_back.draw(sx + self.w // 2, sy + self.h // 2 - 80)
+            self.hp_bar.draw(sx + self.w // 2 + 1 - int(self.hp_bar.w // 2 * (100 - self.hp) / 100), sy + self.h // 2 - 1 - 80, int(self.hp_bar.w * self.hp / 100),
+                             self.hp_bar.h)
             Ice_Pillar.image[self.state].clip_composite_draw(frame_size * int(self.frame), 0, frame_size, Ice_Pillar.image[self.state].h, 1.57, '', sx + self.w // 2, sy + self.h // 2, self.w, self.h)
 
     def handle_collision(self, other, group):
@@ -194,9 +204,9 @@ class Ice_Pillar:
     def get_bb(self):
         # 가로 모양
         if self.dir == 0:
-            return self.x - 56, self.y - 22, self.x + 56, self.y + 22
+            return self.x, self.y, self.x + 112, self.y + 44
         else:
-            return self.x - 22, self.y - 56, self.x + 22, self.y + 56
+            return self.x, self.y, self.x + 44, self.y + 112
 
 
 class Niflheim(Monster_object.Monster):
@@ -220,6 +230,8 @@ class Niflheim(Monster_object.Monster):
         self.cooltime = {'pillar': 0, 'spear': 5, 'crystal': 5}
         self.delay = 0
         self.build_behavior_tree()
+        self.hp_back = load_image('./Resource/UI/hp_back.png')
+        self.hp_bar = load_image('./Resource/UI/hp_bar.png')
 
     def update(self):
         self.x += self.dx * 20 * PIXEL_PER_METER * game_framework.frame_time
@@ -244,6 +256,7 @@ class Niflheim(Monster_object.Monster):
     def draw(self, x, y):
         sx, sy = self.x + x, self.y + y
         frame_size = Niflheim.image[self.state].w // self.frames[self.state]
+        self.draw_hp(x, y)
         if self.dir == 1:
             Niflheim.image[self.state].clip_draw(frame_size * int(self.frame), 0, frame_size, Niflheim.image[self.state].h, sx + self.w // 2, sy + self.h // 2, self.w, self.h)
         else:
@@ -276,10 +289,10 @@ class Niflheim(Monster_object.Monster):
             game_world.remove_object(o)
         play_state.ice_pillars.clear()
         self.cooltime['pillar'] = 10
-        play_state.ice_pillars.append(Ice_Pillar(- self.w - 20, 0, 90, 100))
-        play_state.ice_pillars.append(Ice_Pillar(self.w - 20, 0, 90, 100))
-        play_state.ice_pillars.append(Ice_Pillar(- 20, - self.h, 0, 100))
-        play_state.ice_pillars.append(Ice_Pillar(- 20, + self.h, 0, 100))
+        play_state.ice_pillars.append(Ice_Pillar(- self.w - 20 - 40, 0, 90, 100))
+        play_state.ice_pillars.append(Ice_Pillar(self.w - 20 + 40, 0, 90, 100))
+        play_state.ice_pillars.append(Ice_Pillar(- 20, - self.h - 40, 0, 100))
+        play_state.ice_pillars.append(Ice_Pillar(- 20, + self.h + 40, 0, 100))
         game_world.add_objects(play_state.ice_pillars, 1)
         self.delay = 2
         return BehaviorTree.SUCCESS
