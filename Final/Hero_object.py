@@ -1,5 +1,7 @@
 from pico2d import *
 
+import Item_object
+import Swing_object
 import play_state
 import Bullet_object
 import Camera
@@ -184,11 +186,6 @@ class Hero:
         self.jump_left = load_image('./Resource/Char/CharJump_L.png')
         self.die = load_image('./Resource/Char/CharDie.png')
         self.hand = load_image('./Resource/Char/CharHand0.png')
-        # 무기 이미지 dic로 바꿔서 문자열로 변경 예정
-        self.weapon_image = load_image('./Resource/Weapon/Colt.png')
-        self.equip_weapon = 'Colt'
-        # 0 근접무기, 1 원거리무기
-        self.weapon_type = 1
         self.x = 80
         self.y = 80
         self.frame = 0
@@ -205,9 +202,12 @@ class Hero:
         self.normal = [0, 0]
         self.fall = True
         self.hp = 100
-        self.power = 50
+        self.power = 20
         self.invincible = 0
-
+        self.item = {'sword': Item_object.Item('sword', 0, 0, 'equip', 5, 0, 0, 0.7)}
+        self.equip_weapon = 'sword'
+        self.hand_x, self.hand_y = self.x + 20, self.y + 10
+        game_world.add_object(self.item['sword'], 2)
 
     def move(self):
         self.x += self.dir * self.status['speed'] * PIXEL_PER_METER * game_framework.frame_time
@@ -249,38 +249,48 @@ class Hero:
                 if self.invincible <= 0:
                     self.invincible = 1.5
                     self.hp -= other.power
-                    print(self.hp)
+            case 'hero:item':
+                self.item[other.name] = other
+                game_world.remove_collision_object(other)
+                self.change_weapon(other.name)
+
+    def change_weapon(self, name):
+        self.item[self.equip_weapon].state = 'inven'
+        self.equip_weapon = name
+        self.item[self.equip_weapon].state = 'equip'
 
 
-
-
-    def weapon_draw(self, x, y):
-        width, height = self.weapon_image.w * 1.3, self.weapon_image.h * 1.3
-        if self.face_dir == 1:
-            self.weapon_image.clip_composite_draw(0, 0, self.weapon_image.w, self.weapon_image.h, 0, 'h', self.x + width // 2 + x + 20, self.y + height // 2 + y + 5, width,height)
-        else:
-            self.weapon_image.clip_draw(0, 0, self.weapon_image.w, self.weapon_image.h, self.x + width // 2 + x,
-                                        self.y + height // 2 + y + 5, width, height)
-        self.hand.clip_draw(0, 0, self.hand.w, self.hand.h, self.x + 20 + x, self.y + 10 + y, 7, 7)
+    # def weapon_draw(self, x, y):
+    #     width, height = self.weapon_image.w * 1.3, self.weapon_image.h * 1.3
+    #     if self.face_dir == 1:
+    #         self.weapon_image.clip_composite_draw(0, 0, self.weapon_image.w, self.weapon_image.h, 0, 'h', self.x + width // 2 + x + 20, self.y + height // 2 + y + 5, width,height)
+    #     else:
+    #         self.weapon_image.clip_draw(0, 0, self.weapon_image.w, self.weapon_image.h, self.x + width // 2 + x,
+    #                                     self.y + height // 2 + y + 5, width, height)
+    #     self.hand.clip_draw(0, 0, self.hand.w, self.hand.h, self.x + 20 + x, self.y + 10 + y, 7, 7)
 
     def draw(self, x, y):
         self.cur_state.draw(self, x, y)
-        self.weapon_draw(x, y)
+        self.hand.clip_draw(0, 0, self.hand.w, self.hand.h, self.hand_x + x, self.hand_y + y, 7, 7)
+        # self.weapon_draw(x, y)
         # self.body_draw(x, y)
 
     def attack(self):
-        if self.weapon_type == 1:
-            bullet = Bullet_object.Bullet(self.x, self.y, self.normal[0], self.normal[1], self.power)
-            game_world.add_object(bullet, 1)
-            if play_state.map.map_num == 1:
-                game_world.add_collision_pairs(bullet, play_state.banshees, 'bullet:monster')
-            elif play_state.map.map_num == 0:
-                game_world.add_collision_pairs(bullet, play_state.biggrayskels, 'bullet:monster')
-            elif play_state.map.map_num == 2:
-                game_world.add_collision_pairs(bullet, play_state.chaindemons, 'bullet:monster')
-            elif play_state.map.map_num == 3:
-                game_world.add_collision_pairs(bullet, play_state.niflheim, 'bullet:boss')
-                game_world.add_collision_pairs(bullet, play_state.ice_pillars, 'bullet:monster')
+        if self.equip_weapon == 'colt':
+            effect = Bullet_object.Bullet(self.x, self.y, self.normal[0], self.normal[1], self.power + self.item[self.equip_weapon].power)
+        if self.equip_weapon == 'sword':
+            effect = Swing_object.Sword_Swing(self.hand_x, self.hand_y, math.atan2(self.normal[1], self.normal[0]), self.power + self.item[self.equip_weapon].power)
+
+        game_world.add_object(effect, 1)
+        if play_state.map.map_num == 1:
+            game_world.add_collision_pairs(effect, play_state.banshees, 'effect:monster')
+        elif play_state.map.map_num == 0:
+            game_world.add_collision_pairs(effect, play_state.biggrayskels, 'effect:monster')
+        elif play_state.map.map_num == 2:
+            game_world.add_collision_pairs(effect, play_state.chaindemons, 'effect:monster')
+        elif play_state.map.map_num == 3:
+            game_world.add_collision_pairs(effect, play_state.niflheim, 'effect:boss')
+            game_world.add_collision_pairs(effect, play_state.ice_pillars, 'effect:monster')
 
 
     def set_normal(self, x, y):
@@ -304,6 +314,7 @@ class Hero:
 
     def update(self):
         self.cur_state.do(self)
+        self.hand_x, self.hand_y = self.x + 20, self.y + 10
         # 피격시 무적 시간
         self.invincible -= game_framework.frame_time
         if self.hp <= 0:
