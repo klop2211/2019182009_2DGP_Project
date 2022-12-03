@@ -14,6 +14,8 @@ class Bullet:
             Bullet.image = load_image('./Resource/Weapon/Bullet10.png')
         self.x, self.y, self.dx, self.dy, self.power = x, y, dx, dy, power
         self.speed = 20
+        self.state = 'live'
+        self.destroy_time = 0.4
 
     def draw(self, x, y):
         if self.dx == -1:
@@ -28,18 +30,24 @@ class Bullet:
     def update(self):
         self.x += self.dx * self.speed * PIXEL_PER_METER * game_framework.frame_time
         self.y += self.dy * self.speed * PIXEL_PER_METER * game_framework.frame_time
+        if self.state == 'destroy':
+            self.destroy_time -= game_framework.frame_time
+        if self.destroy_time <= 0:
+            game_world.remove_object(self)
         if self.x < 20 or self.x > 1180:
             game_world.remove_object(self)
         if self.y < 60 or self.y > 720:
             game_world.remove_object(self)
 
     def handle_collision(self, other, group):
-        if group == 'bullet:monster':
-            other.hp -= max(self.power - other.defense, 0)
-            print(other.hp)
-            game_world.remove_object(self)
-        if group == 'bullet:boss' and other.invincible <= 0:
-            other.hp -= max(self.power - other.defense, 0)
-            print(other.hp)
-            game_world.remove_object(self)
+        if self.state == 'live':
+            if group == 'effect:monster':
+                other.hp -= max(self.power - other.defense, 0)
+                print(other.hp)
+                self.state = 'destroy'
+            if group == 'effect:boss' and other.invincible <= 0:
+                other.hp -= max(self.power - other.defense, 0)
+                print(other.hp)
+                self.state = 'destroy'
+
 
