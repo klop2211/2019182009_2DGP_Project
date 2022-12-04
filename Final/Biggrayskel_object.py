@@ -44,7 +44,7 @@ class Biggrayskel(Monster_object.Monster):
         self.build_behavior_tree()
         self.hp_back = load_image('./Resource/UI/hp_back.png')
         self.hp_bar = load_image('./Resource/UI/hp_bar.png')
-        self.w, self.h = 134, 96
+        self.w, self.h = 74, 36
 
 
     def find_hero_move(self):
@@ -97,7 +97,6 @@ class Biggrayskel(Monster_object.Monster):
         if int(self.frame) == 7:
             self.x, self.y = play_state.hero.x, play_state.hero.y
         if self.timer <= 0:
-            print('attack end')
             self.state = 'idle'
             return BehaviorTree.SUCCESS
         else:
@@ -132,7 +131,7 @@ class Biggrayskel(Monster_object.Monster):
                 return self.x, self.y, self.x + 134, self.y + 96
             else:
                 return self.x - 60, self.y, self.x + 74, self.y + 96
-        return self.x, self.y, self.x + 74, self.y + 96
+        return self.x, self.y, self.x + 74, self.y + 66
 
 
     # def set_dir(self):
@@ -160,7 +159,6 @@ class Biggrayskel(Monster_object.Monster):
 
 
     def draw(self, x, y):
-        self.draw_hp(x, y)
         if self.state == 'idle':
             frame_size = self.idle.w // self.frames['idle']
             if self.face_dir == 1:
@@ -197,6 +195,5 @@ class Biggrayskel(Monster_object.Monster):
                 self.skill.clip_composite_draw(frame_size * int(self.frame), 0, frame_size, self.idle.h, 0, 'h',
                                                self.x + 67 + x,
                                                self.y + 48 + y, 134, 96)
-        # self.cur_state.draw(self, x, y)
-
+        self.draw_hp(x, y)
 

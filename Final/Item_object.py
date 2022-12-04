@@ -40,12 +40,12 @@ class Item:
                 if self.dir == 1:
                     Item.image[self.name].clip_composite_draw(width * self.swing, 0, width, Item.image[self.name].h, 0,
                                                               ' ',
-                                                              sx + self.w // 2, sy + self.h // 2, self.w,
+                                                              sx + self.w // 2 - self.w, sy + self.h // 2, self.w,
                                                               self.h)
                 else:
                     Item.image[self.name].clip_composite_draw(width * self.swing, 0, width, Item.image[self.name].h, 0,
                                                               'h',
-                                                              sx + self.w // 2 - self.w, sy + self.h // 2, self.w,
+                                                              sx + self.w // 2, sy + self.h // 2, self.w,
                                                               self.h)
         elif self.name == 'saber':
             dir = 3.14 * 90 / 180

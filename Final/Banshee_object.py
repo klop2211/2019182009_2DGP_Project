@@ -36,7 +36,7 @@ class Banshee_Bullet:
 
 
     def get_bb(self):
-        return self.x - 15, self.y - 15, self.x + 15, self.y + 15
+        return self.x, self.y, self.x + 30, self.y + 30
 
 
     def update(self):
