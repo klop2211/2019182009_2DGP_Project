@@ -237,6 +237,7 @@ class Niflheim(Monster_object.Monster):
         self.x += self.dx * 20 * PIXEL_PER_METER * game_framework.frame_time
         self.y += self.dy * 20 * PIXEL_PER_METER * game_framework.frame_time
         self.delay -= game_framework.frame_time
+        self.invincible -= game_framework.frame_time
         self.frame = (self.frame + self.frames[self.state] * ACTION_PER_TIME * game_framework.frame_time)
         if self.state == 'idle':
             self.frame %= self.frames[self.state]

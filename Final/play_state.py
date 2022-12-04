@@ -46,11 +46,11 @@ def set_map():
         if o.state == 'drop':
             game_world.remove_object(o)
     if map.map_num == 1:
-        items.append(Item_object.Item('colt', 100, 100, 'drop', 10))
+        items.append(Item_object.Item('colt', 100, 100, 'drop', 10, 0, 0, 0.3))
     elif map.map_num == 2:
-        items.append(Item_object.Item('saber', 600, 500, 'drop', 20))
+        items.append(Item_object.Item('saber', 600, 500, 'drop', 7, 0, 0, 0.2))
     elif map.map_num == 3:
-        items.append(Item_object.Item('shotgun', 200, 200, 'drop', 5))
+        items.append(Item_object.Item('shotgun', 200, 200, 'drop', 5, 0, 0, 0.5))
     game_world.add_objects(items, 2)
     minimap.num = map.map_num
     for o in walls:
@@ -145,12 +145,26 @@ def monster_spawn():
         game_world.add_object(niflheim, 1)
         game_world.add_collision_pairs(hero, niflheim, 'hero:monster')
 
+def check_monster():
+    if map.map_num == 0:
+        if not biggrayskels:
+            return False
+    if map.map_num == 1:
+        if not banshees:
+            return False
+    if map.map_num == 2:
+        if not chaindemons:
+            return False
+    return True
+
 
 def update():
     # hero.update(camera.x)
     Camera.camera.update(hero)
     if time.time() - spawn_timer > 2 and map.state == 0:
         monster_spawn()
+        map.state = 1
+    if not check_monster():
         map.state = 2
     if hero.mouse_x > hero.x + Camera.camera.x:
         hero.face_dir = 1

@@ -15,7 +15,7 @@ class Bullet:
         self.x, self.y, self.dx, self.dy, self.power = x, y, dx, dy, power
         self.speed = 20
         self.state = 'live'
-        self.destroy_time = 0.4
+        self.destroy_time = 0.1
 
     def draw(self, x, y):
         if self.dx == -1:

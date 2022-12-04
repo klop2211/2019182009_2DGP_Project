@@ -9,14 +9,18 @@ import game_world
 import game_framework
 import time
 
-aD, dD, aU, dU, TIMER, SPACE, SHIFT, MOUSE_LD = range(8)
+aD, dD, aU, dU, TIMER, SPACE, SHIFT, MOUSE_LD, KEY_1, KEY_2, KEY_3, KEY_4 = range(12)
 key_event_table = {
     (SDL_KEYDOWN, SDLK_LSHIFT): SHIFT,
     (SDL_KEYDOWN, SDLK_SPACE): SPACE,
     (SDL_KEYDOWN, SDLK_a): aD,
     (SDL_KEYDOWN, SDLK_d): dD,
     (SDL_KEYUP, SDLK_a): aU,
-    (SDL_KEYUP, SDLK_d): dU
+    (SDL_KEYUP, SDLK_d): dU,
+    (SDL_KEYDOWN, SDLK_1): KEY_1,
+    (SDL_KEYDOWN, SDLK_2): KEY_2,
+    (SDL_KEYDOWN, SDLK_3): KEY_3,
+    (SDL_KEYDOWN, SDLK_4): KEY_4,
 }
 
 mouse_event_table = {
@@ -30,9 +34,16 @@ class IDLE:
         self.dir = 0
     @staticmethod
     def exit(self, event):
-        if event == MOUSE_LD:
+        if event == MOUSE_LD and self.attack_time <= 0:
             self.attack()
-
+        if event == KEY_1:
+            self.change_weapon(0)
+        elif event == KEY_2 and self.item[1]:
+            self.change_weapon(1)
+        elif event == KEY_3 and self.item[2]:
+            self.change_weapon(2)
+        elif event == KEY_4 and self.item[3]:
+            self.change_weapon(3)
     @staticmethod
     def do(self):
         self.frame = (self.frame + FRAMES_PER_ACTION * ACTION_PER_TIME * game_framework.frame_time) % self.frames['idle']
@@ -60,7 +71,7 @@ class RUN:
             self.dir += 1
     @staticmethod
     def exit(self, event):
-        if event == MOUSE_LD:
+        if event == MOUSE_LD and self.attack_time <= 0:
             self.attack()
     @staticmethod
     def do(self):
@@ -95,7 +106,7 @@ class JUMP:
 
     @staticmethod
     def exit(self, event):
-        if event == MOUSE_LD:
+        if event == MOUSE_LD and self.attack_time <= 0:
             self.attack()
     @staticmethod
     def do(self):
@@ -135,7 +146,7 @@ class DASH:
             DASH.runtime = time.time()
     @staticmethod
     def exit(self, event):
-        if event == MOUSE_LD:
+        if event == MOUSE_LD and self.attack_time <= 0:
             self.attack()
     @staticmethod
     def do(self):
@@ -157,10 +168,10 @@ class DASH:
             self.run_left.clip_draw(0, 0, frame_size, self.run_left.h, self.x + 20 + x, self.y + 20 + y, 40, 40)
 
 next_state = {
-    IDLE: {aU: RUN, dU: RUN, aD: RUN, dD: RUN, TIMER: IDLE, SPACE: JUMP, SHIFT: DASH, MOUSE_LD: IDLE},
-    RUN: {aU: IDLE, dU: IDLE, aD: IDLE, dD: IDLE, TIMER: RUN, SPACE: JUMP, SHIFT: DASH, MOUSE_LD: RUN},
-    JUMP: {aU: JUMP, dU: JUMP, aD: JUMP, dD: JUMP, SPACE: JUMP, TIMER: IDLE, SHIFT: DASH, MOUSE_LD: JUMP},
-    DASH: {aU: DASH, dU: DASH, aD: DASH, dD: DASH, SPACE: JUMP, TIMER: IDLE, SHIFT: DASH, MOUSE_LD: DASH},
+    IDLE: {aU: RUN, dU: RUN, aD: RUN, dD: RUN, TIMER: IDLE, SPACE: JUMP, SHIFT: DASH, MOUSE_LD: IDLE, KEY_1: IDLE, KEY_2: IDLE, KEY_3: IDLE, KEY_4: IDLE},
+    RUN: {aU: IDLE, dU: IDLE, aD: IDLE, dD: IDLE, TIMER: RUN, SPACE: JUMP, SHIFT: DASH, MOUSE_LD: RUN, KEY_1: RUN, KEY_2: RUN, KEY_3: RUN, KEY_4: RUN},
+    JUMP: {aU: JUMP, dU: JUMP, aD: JUMP, dD: JUMP, SPACE: JUMP, TIMER: IDLE, SHIFT: DASH, MOUSE_LD: JUMP, KEY_1: JUMP, KEY_2: JUMP, KEY_3: JUMP, KEY_4: JUMP},
+    DASH: {aU: DASH, dU: DASH, aD: DASH, dD: DASH, SPACE: JUMP, TIMER: IDLE, SHIFT: DASH, MOUSE_LD: DASH, KEY_1: DASH, KEY_2: DASH, KEY_3: DASH, KEY_4: DASH},
 }
 
 PIXEL_PER_METER = 40
@@ -174,18 +185,33 @@ import math
 
 def distance(x, y):
     return math.sqrt(x * x + y * y)
-
 # 주인공 : 크기 (40,40)
 class Hero:
+    be_attack = None
+    attack_colt = None
+    attack_shotgun = None
+    image = None
+
     def __init__(self):
-        self.idle_left = load_image('./Resource/Char/CharIdle_L.png')
-        self.idle_right = load_image('./Resource/Char/CharIdle_R.png')
-        self.run_left = load_image('./Resource/Char/CharRun_L.png')
-        self.run_right = load_image('./Resource/Char/CharRun_R.png')
-        self.jump_right = load_image('./Resource/Char/CharJump_R.png')
-        self.jump_left = load_image('./Resource/Char/CharJump_L.png')
-        self.die = load_image('./Resource/Char/CharDie.png')
-        self.hand = load_image('./Resource/Char/CharHand0.png')
+        if not Hero.be_attack:
+            Hero.be_attack = load_wav('./Resource/Audio/be_attacked.wav')
+            Hero.attack_colt = load_wav('./Resource/Audio/Gun.wav')
+            Hero.attack_shotgun = load_wav('./Resource/Audio/ShotgunVintage.wav')
+            Hero.be_attack.set_volume(30)
+            Hero.attack_colt.set_volume(50)
+            Hero.attack_shotgun.set_volume(50)
+            Hero.image = {'idle_left': load_image('./Resource/Char/CharIdle_L.png'), 'idle_right': load_image('./Resource/Char/CharIdle_R.png'),
+                     'run_left': load_image('./Resource/Char/CharRun_L.png'), 'run_right': load_image('./Resource/Char/CharRun_R.png'),
+                     'jump_right': load_image('./Resource/Char/CharJump_R.png'), 'jump_left': load_image('./Resource/Char/CharJump_L.png'),
+                     'die': load_image('./Resource/Char/CharDie.png'), 'hand': load_image('./Resource/Char/CharHand0.png')}
+        self.idle_left = Hero.image['idle_left']
+        self.idle_right = Hero.image['idle_right']
+        self.run_left = Hero.image['run_left']
+        self.run_right = Hero.image['run_right']
+        self.jump_right = Hero.image['jump_right']
+        self.jump_left = Hero.image['jump_left']
+        self.die = Hero.image['die']
+        self.hand = Hero.image['hand']
         self.x = 80
         self.y = 80
         self.frame = 0
@@ -204,10 +230,12 @@ class Hero:
         self.hp = 100
         self.power = 20
         self.invincible = 0
-        self.item = {'sword': Item_object.Item('sword', 0, 0, 'equip', 5, 0, 0, 0.7)}
-        self.equip_weapon = 'sword'
+        self.item = [Item_object.Item('sword', 0, 0, 'equip', 5, 0, 0, 0.3)]
+        self.equip_weapon = 0
+        self.attack_time = self.item[0].attack_speed
         self.hand_x, self.hand_y = self.x + 20, self.y + 10
-        game_world.add_object(self.item['sword'], 2)
+        game_world.add_object(self.item[0], 2)
+        self.opacify = 1
 
 
     def move(self):
@@ -249,16 +277,17 @@ class Hero:
             case 'hero:monster':
                 if self.invincible <= 0:
                     self.invincible = 1.5
+                    Hero.be_attack.play(1)
                     self.hp -= other.power
             case 'hero:item':
-                self.item[other.name] = other
-                print(other)
+                self.item.append(other)
                 game_world.remove_collision_object(other)
-                self.change_weapon(other.name)
+                play_state.items.remove(other)
+                self.change_weapon(self.equip_weapon + 1)
 
-    def change_weapon(self, name):
+    def change_weapon(self, index):
         self.item[self.equip_weapon].state = 'inven'
-        self.equip_weapon = name
+        self.equip_weapon = index
         self.item[self.equip_weapon].state = 'equip'
 
 
@@ -278,14 +307,21 @@ class Hero:
         # self.body_draw(x, y)
 
     def attack(self):
-        if self.equip_weapon == 'colt':
-            effect = Bullet_object.Bullet(self.x, self.y, self.normal[0], self.normal[1], self.power + self.item[self.equip_weapon].power)
-        if self.equip_weapon == 'sword':
-            effect = Swing_object.Sword_Swing(self.hand_x, self.hand_y, math.atan2(self.normal[1], self.normal[0]), self.power + self.item[self.equip_weapon].power)
-        if self.equip_weapon == 'saber':
-            effect = Swing_object.Saber_Swing(self.hand_x, self.hand_y, math.atan2(self.normal[1], self.normal[0]), self.power + self.item[self.equip_weapon].power)
-
-        game_world.add_object(effect, 1)
+        if self.item[self.equip_weapon].name == 'colt':
+            Hero.attack_colt.play(1)
+            effect = [Bullet_object.Bullet(self.x, self.y, self.normal[0], self.normal[1], self.power + self.item[self.equip_weapon].power)]
+        if self.item[self.equip_weapon].name == 'sword':
+            effect = [Swing_object.Sword_Swing(self.hand_x, self.hand_y, math.atan2(self.normal[1], self.normal[0]), self.power + self.item[self.equip_weapon].power)]
+        if self.item[self.equip_weapon].name == 'saber':
+            effect = [Swing_object.Saber_Swing(self.hand_x, self.hand_y, math.atan2(self.normal[1], self.normal[0]), self.power + self.item[self.equip_weapon].power)]
+        if self.item[self.equip_weapon].name == 'shotgun':
+            Hero.attack_shotgun.play(1)
+            effect = [Bullet_object.Bullet(self.x, self.y, self.normal[0], self.normal[1],
+                                            self.power + self.item[self.equip_weapon].power), Bullet_object.Bullet(self.x, self.y, math.cos(math.atan2(self.normal[1], self.normal[0]) + 3.14 * 30 / 180), math.sin(math.atan2(self.normal[1], self.normal[0]) + 3.14 * 15 / 180),
+                                          self.power + self.item[self.equip_weapon].power), Bullet_object.Bullet(self.x, self.y, math.cos(math.atan2(self.normal[1], self.normal[0]) + 3.14 * -30 / 180), math.sin(math.atan2(self.normal[1], self.normal[0]) + 3.14 * -15 / 180),
+                                          self.power + self.item[self.equip_weapon].power)]
+        math.cos(math.atan2(self.normal[1], self.normal[0]) + 3.14 * 30 / 180)
+        game_world.add_objects(effect, 1)
         if play_state.map.map_num == 1:
             game_world.add_collision_pairs(effect, play_state.banshees, 'effect:monster')
         elif play_state.map.map_num == 0:
@@ -295,6 +331,7 @@ class Hero:
         elif play_state.map.map_num == 3:
             game_world.add_collision_pairs(effect, play_state.niflheim, 'effect:boss')
             game_world.add_collision_pairs(effect, play_state.ice_pillars, 'effect:monster')
+        self.attack_time = self.item[self.equip_weapon].attack_speed
 
 
     def set_normal(self, x, y):
@@ -318,9 +355,25 @@ class Hero:
 
     def update(self):
         self.cur_state.do(self)
+        self.attack_time -= game_framework.frame_time
         self.hand_x, self.hand_y = self.x + 20, self.y + 10
         # 피격시 무적 시간
         self.invincible -= game_framework.frame_time
+        if self.invincible > 0:
+            if self.opacify == 1:
+                self.opacify = 0
+                for a in Hero.image:
+                    Hero.image[a].opacify(0)
+            else:
+                self.opacify = 1
+                for a in Hero.image:
+                    Hero.image[a].opacify(1)
+        else:
+            if self.opacify == 0:
+                self.opacify = 1
+                for a in Hero.image:
+                    Hero.image[a].opacify(1)
+
         if self.hp <= 0:
             # to do: 게임 엔딩(게임 오버)
             pass
