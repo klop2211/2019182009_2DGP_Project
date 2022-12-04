@@ -44,6 +44,7 @@ class Biggrayskel(Monster_object.Monster):
         self.build_behavior_tree()
         self.hp_back = load_image('./Resource/UI/hp_back.png')
         self.hp_bar = load_image('./Resource/UI/hp_bar.png')
+        self.w, self.h = 134, 96
 
 
     def find_hero_move(self):
@@ -127,8 +128,11 @@ class Biggrayskel(Monster_object.Monster):
 
     def get_bb(self):
         if self.state == 'attack':
-            return self.x - 67, self.y - 48, self.x + 67, self.y + 48
-        return self.x - 37, self.y - 48, self.x + 37, self.y + 48
+            if self.dir == 1:
+                return self.x, self.y, self.x + 134, self.y + 96
+            else:
+                return self.x - 60, self.y, self.x + 74, self.y + 96
+        return self.x, self.y, self.x + 74, self.y + 96
 
 
     # def set_dir(self):
@@ -142,19 +146,21 @@ class Biggrayskel(Monster_object.Monster):
     def handle_collision(self, other, group):
         if group == 'biggrayskel:block':
             self.y = clamp(other.top * 40, self.y, 660)
-        if self.hp <= 0:
-            game_world.add_object(Die_object.Die(self.x, self.y, 134, 96), 1)
-            game_world.remove_object(self)
-            play_state.biggrayskels.remove(self)
+
 
 
     def update(self):
         self.frame = (self.frame + FRAMES_PER_ACTION * ACTION_PER_TIME * game_framework.frame_time) % self.frames[self.state]
         self.bt.run()
         self.y -= 10 * PIXEL_PER_METER * game_framework.frame_time
+        if self.hp <= 0:
+            game_world.add_object(Die_object.Die(self.x, self.y, 134, 96), 1)
+            game_world.remove_object(self)
+            play_state.biggrayskels.remove(self)
 
 
     def draw(self, x, y):
+        self.draw_hp(x, y)
         if self.state == 'idle':
             frame_size = self.idle.w // self.frames['idle']
             if self.face_dir == 1:

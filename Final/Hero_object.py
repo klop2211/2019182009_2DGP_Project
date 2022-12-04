@@ -209,6 +209,7 @@ class Hero:
         self.hand_x, self.hand_y = self.x + 20, self.y + 10
         game_world.add_object(self.item['sword'], 2)
 
+
     def move(self):
         self.x += self.dir * self.status['speed'] * PIXEL_PER_METER * game_framework.frame_time
 
@@ -251,6 +252,7 @@ class Hero:
                     self.hp -= other.power
             case 'hero:item':
                 self.item[other.name] = other
+                print(other)
                 game_world.remove_collision_object(other)
                 self.change_weapon(other.name)
 
@@ -280,6 +282,8 @@ class Hero:
             effect = Bullet_object.Bullet(self.x, self.y, self.normal[0], self.normal[1], self.power + self.item[self.equip_weapon].power)
         if self.equip_weapon == 'sword':
             effect = Swing_object.Sword_Swing(self.hand_x, self.hand_y, math.atan2(self.normal[1], self.normal[0]), self.power + self.item[self.equip_weapon].power)
+        if self.equip_weapon == 'saber':
+            effect = Swing_object.Saber_Swing(self.hand_x, self.hand_y, math.atan2(self.normal[1], self.normal[0]), self.power + self.item[self.equip_weapon].power)
 
         game_world.add_object(effect, 1)
         if play_state.map.map_num == 1:

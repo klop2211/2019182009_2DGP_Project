@@ -237,12 +237,12 @@ class Niflheim(Monster_object.Monster):
         self.x += self.dx * 20 * PIXEL_PER_METER * game_framework.frame_time
         self.y += self.dy * 20 * PIXEL_PER_METER * game_framework.frame_time
         self.delay -= game_framework.frame_time
-        for k, v in self.cooltime.items():
-            self.cooltime[k] -= game_framework.frame_time
         self.frame = (self.frame + self.frames[self.state] * ACTION_PER_TIME * game_framework.frame_time)
         if self.state == 'idle':
             self.frame %= self.frames[self.state]
             if self.delay <= 0:
+                for k in self.cooltime:
+                    self.cooltime[k] -= game_framework.frame_time
                 self.bt.run()
         if self.state == 'enter' and self.frame >= self.frames['enter']:
             self.frame = 0

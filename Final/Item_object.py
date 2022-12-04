@@ -8,7 +8,7 @@ class Item:
     def __init__(self, name, x, y, state='drop', power=0, defense=0, speed=0, attack_speed=0):
         if not Item.image:
             Item.image = {'sword': load_image('./Resource/Weapon/Sword.png'),
-                          'saber': load_image('./Resource/Weapon/Saber.png'),
+                          'saber': load_image('./Resource/Weapon/SaberCase.png'),
                           'colt': load_image('./Resource/Weapon/Colt.png'),
                           'shotgun': load_image('./Resource/Weapon/Shotgun.png')}
 
@@ -16,7 +16,7 @@ class Item:
             name, power, defense, speed, attack_speed, state
         self.x, self.y = x, y
         self.w, self.h = Item.image[name].w * 1.5, Item.image[name].h * 1.5
-        self.dir = 0
+        self.dir = 1
         self.swing = 0
 
     def draw(self, x, y):
@@ -47,7 +47,16 @@ class Item:
                                                               'h',
                                                               sx + self.w // 2 - self.w, sy + self.h // 2, self.w,
                                                               self.h)
-
+        elif self.name == 'saber':
+            dir = 3.14 * 90 / 180
+            if self.dir == 1:
+                Item.image[self.name].clip_composite_draw(0, 0, Item.image[self.name].w,
+                                                          Item.image[self.name].h, dir, 'h', sx,
+                                                          sy, self.w, self.h)
+            else:
+                Item.image[self.name].clip_composite_draw(0, 0, Item.image[self.name].w,
+                                                          Item.image[self.name].h, -dir, ' ', sx,
+                                                          sy, self.w, self.h)
         else:
             if self.dir == 1:
                 Item.image[self.name].clip_composite_draw(0, 0, Item.image[self.name].w,
@@ -69,8 +78,8 @@ class Item:
 
     def get_bb(self):
         if self.state == 'drop':
-            print(1234)
             return self.x, self.y, self.x + self.w, self.y + self.h
+        return 0,0,0,0
 
     def handle_collision(self, other, group):
         pass

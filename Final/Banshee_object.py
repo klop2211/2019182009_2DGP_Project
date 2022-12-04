@@ -78,6 +78,7 @@ class Banshee(Monster_object.Monster):
         self.build_behavior_tree()
         self.hp_back = load_image('./Resource/UI/hp_back.png')
         self.hp_bar = load_image('./Resource/UI/hp_bar.png')
+        self.w, self.h = 40, 44
 
     def find_hero_attack(self):
         distance2 = (play_state.hero.x - self.x) ** 2 + (play_state.hero.y - self.y) ** 2
@@ -117,7 +118,7 @@ class Banshee(Monster_object.Monster):
         self.bt = BehaviorTree(attack_node)
 
     def get_bb(self):
-        return self.x - 20, self.y - 22, self.x + 20, self.y + 22
+        return self.x, self.y, self.x + 40, self.y + 44
 
     def fire_bullet(self):
         bullets =[]
@@ -149,6 +150,7 @@ class Banshee(Monster_object.Monster):
             play_state.banshees.remove(self)
 
     def draw(self, x, y):
+        self.draw_hp(x, y)
         if self.state == 'attack':
             frame_size = self.attack.w // self.frames['attack']
             if self.dir == 1:

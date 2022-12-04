@@ -38,13 +38,20 @@ chaindemons = []
 spawn_timer = None
 ice_pillars = []
 niflheim = None
-item = None
+items = []
 
 def set_map():
-    global map, walls, doors, blocks, check_col, minimap, biggrayskels, spawn_timer, item
-    item = Item_object.Item('colt', 200, 200)
-    game_world.add_object(item, 2)
-
+    global map, walls, doors, blocks, check_col, minimap, biggrayskels, spawn_timer, items
+    for o in items:
+        if o.state == 'drop':
+            game_world.remove_object(o)
+    if map.map_num == 1:
+        items.append(Item_object.Item('colt', 100, 100, 'drop', 10))
+    elif map.map_num == 2:
+        items.append(Item_object.Item('saber', 600, 500, 'drop', 20))
+    elif map.map_num == 3:
+        items.append(Item_object.Item('shotgun', 200, 200, 'drop', 5))
+    game_world.add_objects(items, 2)
     minimap.num = map.map_num
     for o in walls:
         game_world.remove_collision_object(o)
@@ -58,7 +65,7 @@ def set_map():
     game_world.add_collision_pairs(hero, walls, 'hero:wall')
     game_world.add_collision_pairs(hero, blocks, 'hero:block')
     game_world.add_collision_pairs(hero, doors, 'hero:door')
-    game_world.add_collision_pairs(hero, item, 'hero:item')
+    game_world.add_collision_pairs(hero, items, 'hero:item')
     spawn_timer = time.time()
     if map.map_num == 3:
         map.boss_bgm.set_volume(32)

@@ -27,7 +27,7 @@ class Map:
         self.block_right = load_image('./Resource\ice_tile\Ice_OnewayR.png')
         # 0 : enter, 1 : lock, 2 : clear
         self.state = 0
-        self.map_num = 3
+        self.map_num = 1
         self.boss_bgm = load_music('./Resource/Audio/2.IceBoss.mp3')
         self.normal_bgm = load_music('./Resource/Audio/2.IceField.mp3')
 

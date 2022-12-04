@@ -69,6 +69,7 @@ class Chaindemon(Monster_object.Monster):
         self.build_behavior_tree()
         self.hp_back = load_image('./Resource/UI/hp_back.png')
         self.hp_bar = load_image('./Resource/UI/hp_bar.png')
+        self.w, self.h = 96, 78
 
     def find_hero_attack(self):
         distance2 = (play_state.hero.x - self.x) ** 2 + (play_state.hero.y - self.y) ** 2
@@ -132,7 +133,7 @@ class Chaindemon(Monster_object.Monster):
         self.bt = BehaviorTree(offence_node)
 
     def get_bb(self):
-        return self.x - 48, self.y - 39, self.x + 48, self.y + 39
+        return self.x, self.y, self.x + 96, self.y + 78
 
     def fire_bullet(self):
         bullets = []
@@ -177,6 +178,7 @@ class Chaindemon(Monster_object.Monster):
             play_state.chaindemons.remove(self)
 
     def draw(self, x, y):
+        self.draw_hp(x, y)
         if self.state == 'attack':
             frame_size = self.attack.w // self.frames['attack']
             if self.dir == 1:
