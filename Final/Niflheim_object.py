@@ -7,6 +7,7 @@ import play_state
 from BehaviorTree import BehaviorTree, SelectorNode, SequenceNode, LeafNode
 import game_framework
 import math
+import clear_state
 
 PIXEL_PER_METER = 40
 RUN_SPEED_MPS = 5
@@ -249,8 +250,7 @@ class Niflheim(Monster_object.Monster):
             self.frame = 0
             self.state = 'idle'
         if self.state == 'die' and self.frame >= self.frames['die']:
-            pass
-            # to do: 게임 엔딩(클리어)
+            game_framework.push_state(clear_state)
         if self.hp <= 0 and self.state != 'die':
             self.state = 'die'
 

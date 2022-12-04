@@ -8,7 +8,7 @@ import Camera
 import game_world
 import game_framework
 import time
-
+import dead_state
 aD, dD, aU, dU, TIMER, SPACE, SHIFT, MOUSE_LD, KEY_1, KEY_2, KEY_3, KEY_4 = range(12)
 key_event_table = {
     (SDL_KEYDOWN, SDLK_LSHIFT): SHIFT,
@@ -228,14 +228,24 @@ class Hero:
         self.normal = [0, 0]
         self.fall = True
         self.hp = 100
-        self.power = 20
+        self.power = 10
         self.invincible = 0
-        self.item = [Item_object.Item('sword', 0, 0, 'equip', 5, 0, 0, 0.3)]
+        self.item = [Item_object.Item('sword', 0, 0, 'equip', 10, 0, 0, 0.2)]
         self.equip_weapon = 0
         self.attack_time = self.item[0].attack_speed
         self.hand_x, self.hand_y = self.x + 20, self.y + 10
         game_world.add_object(self.item[0], 2)
         self.opacify = 1
+        self.w, self.h = 40, 40
+        self.hp_back = load_image('./Resource/UI/hp_back.png')
+        self.hp_bar = load_image('./Resource/UI/hp_bar.png')
+
+    def draw_hp(self, x, y):
+        sx, sy = self.x + x, self.y + y
+        self.hp_back.draw(sx + self.w // 2, sy + self.h // 2 - 40)
+        self.hp_bar.draw(sx + self.w // 2 + 1 - int(self.hp_bar.w // 2 * (100 - self.hp) / 100),
+                         sy + self.h // 2 - 1 - 40, int(self.hp_bar.w * self.hp / 100),
+                         self.hp_bar.h)
 
 
     def move(self):
@@ -301,8 +311,18 @@ class Hero:
     #     self.hand.clip_draw(0, 0, self.hand.w, self.hand.h, self.x + 20 + x, self.y + 10 + y, 7, 7)
 
     def draw(self, x, y):
-        self.cur_state.draw(self, x, y)
-        self.hand.clip_draw(0, 0, self.hand.w, self.hand.h, self.hand_x + x, self.hand_y + y, 7, 7)
+        if self.hp > 0:
+
+            self.cur_state.draw(self, x, y)
+            self.hand.clip_draw(0, 0, self.hand.w, self.hand.h, self.hand_x + x, self.hand_y + y, 7, 7)
+            self.draw_hp(x, y)
+
+        else:
+            sx, sy = self.x + x, self.y + y
+            self.die.draw(sx + 20, sy + 20, 40, 40)
+
+
+
         # self.weapon_draw(x, y)
         # self.body_draw(x, y)
 
@@ -311,16 +331,19 @@ class Hero:
             Hero.attack_colt.play(1)
             effect = [Bullet_object.Bullet(self.x, self.y, self.normal[0], self.normal[1], self.power + self.item[self.equip_weapon].power)]
         if self.item[self.equip_weapon].name == 'sword':
+            if self.item[self.equip_weapon].swing:
+                self.item[self.equip_weapon].swing = 0
+            else:
+                self.item[self.equip_weapon].swing = 1
             effect = [Swing_object.Sword_Swing(self.hand_x, self.hand_y, math.atan2(self.normal[1], self.normal[0]), self.power + self.item[self.equip_weapon].power)]
         if self.item[self.equip_weapon].name == 'saber':
             effect = [Swing_object.Saber_Swing(self.hand_x, self.hand_y, math.atan2(self.normal[1], self.normal[0]), self.power + self.item[self.equip_weapon].power)]
         if self.item[self.equip_weapon].name == 'shotgun':
             Hero.attack_shotgun.play(1)
             effect = [Bullet_object.Bullet(self.x, self.y, self.normal[0], self.normal[1],
-                                            self.power + self.item[self.equip_weapon].power), Bullet_object.Bullet(self.x, self.y, math.cos(math.atan2(self.normal[1], self.normal[0]) + 3.14 * 30 / 180), math.sin(math.atan2(self.normal[1], self.normal[0]) + 3.14 * 15 / 180),
-                                          self.power + self.item[self.equip_weapon].power), Bullet_object.Bullet(self.x, self.y, math.cos(math.atan2(self.normal[1], self.normal[0]) + 3.14 * -30 / 180), math.sin(math.atan2(self.normal[1], self.normal[0]) + 3.14 * -15 / 180),
+                                            self.power + self.item[self.equip_weapon].power), Bullet_object.Bullet(self.x, self.y, math.cos(math.atan2(self.normal[1], self.normal[0]) + 3.14 * 15 / 180), math.sin(math.atan2(self.normal[1], self.normal[0]) + 3.14 * 15 / 180),
+                                          self.power + self.item[self.equip_weapon].power), Bullet_object.Bullet(self.x, self.y, math.cos(math.atan2(self.normal[1], self.normal[0]) + 3.14 * -15 / 180), math.sin(math.atan2(self.normal[1], self.normal[0]) + 3.14 * -15 / 180),
                                           self.power + self.item[self.equip_weapon].power)]
-        math.cos(math.atan2(self.normal[1], self.normal[0]) + 3.14 * 30 / 180)
         game_world.add_objects(effect, 1)
         if play_state.map.map_num == 1:
             game_world.add_collision_pairs(effect, play_state.banshees, 'effect:monster')
@@ -373,10 +396,11 @@ class Hero:
                 self.opacify = 1
                 for a in Hero.image:
                     Hero.image[a].opacify(1)
-
         if self.hp <= 0:
-            # to do: 게임 엔딩(게임 오버)
-            pass
+            self.opacify = 1
+            for a in Hero.image:
+                Hero.image[a].opacify(1)
+            game_framework.push_state(dead_state)
         self.y = min(680, self.y)
         # 중력
         self.y -= 10 * PIXEL_PER_METER * game_framework.frame_time

@@ -48,9 +48,9 @@ def set_map():
     if map.map_num == 1:
         items.append(Item_object.Item('colt', 100, 100, 'drop', 10, 0, 0, 0.3))
     elif map.map_num == 2:
-        items.append(Item_object.Item('saber', 600, 500, 'drop', 7, 0, 0, 0.2))
+        items.append(Item_object.Item('saber', 600, 500, 'drop', 15, 0, 0, 0.15))
     elif map.map_num == 3:
-        items.append(Item_object.Item('shotgun', 200, 200, 'drop', 5, 0, 0, 0.5))
+        items.append(Item_object.Item('shotgun', 200, 200, 'drop', 5, 0, 0, 0.6))
     game_world.add_objects(items, 2)
     minimap.num = map.map_num
     for o in walls:
@@ -70,7 +70,7 @@ def set_map():
     if map.map_num == 3:
         map.boss_bgm.set_volume(32)
         map.boss_bgm.repeat_play()
-    else:
+    elif map.map_num == 0:
         map.normal_bgm.set_volume(32)
         map.normal_bgm.repeat_play()
 
@@ -88,11 +88,11 @@ def enter():
     map = Map_object.Map()
     minimap = UI_object.Minimap(map.map_num)
     hero = Hero_object.Hero()
-    biggrayskels.append(Biggrayskel_object.Biggrayskel(16 * 40, 2 * 40, 10, 100, 3))
-    biggrayskels.append(Biggrayskel_object.Biggrayskel(7 * 40, 5 * 40, 10, 100, 3))
-    biggrayskels.append(Biggrayskel_object.Biggrayskel(24 * 40, 8 * 40, 10, 100, 3))
-    biggrayskels.append(Biggrayskel_object.Biggrayskel(17 * 40, 13 * 40, 10, 100, 3))
-    biggrayskels.append(Biggrayskel_object.Biggrayskel(10 * 40, 12 * 40, 10, 100, 3))
+    biggrayskels.append(Biggrayskel_object.Biggrayskel(16 * 40, 2 * 40, 9, 100, 0))
+    biggrayskels.append(Biggrayskel_object.Biggrayskel(7 * 40, 5 * 40, 9, 100, 0))
+    biggrayskels.append(Biggrayskel_object.Biggrayskel(24 * 40, 8 * 40, 9, 100, 0))
+    biggrayskels.append(Biggrayskel_object.Biggrayskel(17 * 40, 13 * 40, 9, 100, 0))
+    biggrayskels.append(Biggrayskel_object.Biggrayskel(10 * 40, 12 * 40, 9, 100, 0))
     banshees.append(Banshee_object.Banshee(6 * 40, 2 * 40, 7, 100, 5))
     banshees.append(Banshee_object.Banshee(4 * 40, 10 * 40, 7, 100, 5))
     banshees.append(Banshee_object.Banshee(10 * 40, 16 * 40, 7, 100, 5))
@@ -106,7 +106,7 @@ def enter():
     chaindemons.append(Chaindemon_object.Chaindemon(14 * 40, 8 * 40, 12, 100, 7))
     chaindemons.append(Chaindemon_object.Chaindemon(8 * 40, 15 * 40, 12, 100, 7))
     chaindemons.append(Chaindemon_object.Chaindemon(4 * 40, 11 * 40, 12, 100, 7))
-    niflheim = Niflheim_object.Niflheim(600, 440, 15, 100, 10)
+    niflheim = Niflheim_object.Niflheim(600, 440, 20, 100, 10)
     set_map()
     # walls = [Map_bb.Wall(*l) for l in wall_data[map.map_num]]
     # blocks = [Map_bb.Block(*l) for l in block_data[map.map_num]]
@@ -114,7 +114,7 @@ def enter():
     game_world.add_objects(walls, 0)
     game_world.add_object(map, 0)
     game_world.add_object(hero, 1)
-    game_world.add_object(minimap, 1)
+    game_world.add_object(minimap, 2)
     # game_world.add_collision_pairs(hero, walls, 'hero:wall')
     # game_world.add_collision_pairs(hero, blocks, 'hero:block')
     # game_world.add_collision_pairs(hero, doors, 'hero:door')
