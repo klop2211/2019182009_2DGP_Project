@@ -25,7 +25,7 @@ class Sword_Swing():
         self.x, self.y, self.dir, self.power = x, y, dir - 1.57, power
         self.frame = 0
         self.frames = 3
-        self.w, self.h = Sword_Swing.image.w // self.frames * 3.5, Sword_Swing.image.h * 3.5
+        self.w, self.h = Sword_Swing.image.w // self.frames * 4, Sword_Swing.image.h * 4
         self.state = 'live'
         self.destroy_time = 0.4
 
@@ -74,7 +74,7 @@ class Saber_Swing:
         self.x, self.y, self.dir, self.power = x, y, dir, power
         self.frame = 0
         self.frames = 7
-        self.w, self.h = Saber_Swing.image.w // self.frames * 3.5, Saber_Swing.image.h * 3.5
+        self.w, self.h = Saber_Swing.image.w // self.frames * 4, Saber_Swing.image.h * 4
         self.state = 'live'
         self.destroy_time = 0.4
 
@@ -89,7 +89,6 @@ class Saber_Swing:
 
     def draw(self, x, y):
         sx, sy = self.x + x, self.y + y
-        draw_rectangle(sx - self.w // 2, sy - self.h // 2, sx + self.w // 2, sy + self.h // 2)
         frame_size = Saber_Swing.image.w // self.frames
         if math.cos(self.dir) >= 0:
             Saber_Swing.image.clip_composite_draw(frame_size * int(self.frame), 0, frame_size, Saber_Swing.image.h,
@@ -105,9 +104,7 @@ class Saber_Swing:
         if self.state == 'live':
             if group == 'effect:monster':
                 other.hp -= max(self.power - other.defense, 0)
-                print(other.hp)
                 self.state = 'destroy'
             if group == 'effect:boss' and other.invincible <= 0:
                 other.hp -= max(self.power - other.defense, 0)
-                print(other.hp)
                 self.state = 'destroy'
