@@ -126,7 +126,7 @@ class Biggrayskel(Monster_object.Monster):
         pass
 
     def get_bb(self):
-        if self.state == 'attack':
+        if self.state == 'attack' and clamp(4, self.frame, 9) == self.frame:
             if self.dir == 1:
                 return self.x, self.y, self.x + 134, self.y + 96
             else:
