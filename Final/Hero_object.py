@@ -239,6 +239,7 @@ class Hero:
         self.w, self.h = 40, 40
         self.hp_back = load_image('./Resource/UI/hp_back.png')
         self.hp_bar = load_image('./Resource/UI/hp_bar.png')
+        self.invincible_mode = False
 
     def draw_hp(self, x, y):
         sx, sy = self.x + x, self.y + y
@@ -270,9 +271,9 @@ class Hero:
                             play_state.set_map()
                             self.x = 1120
                         else:
-                            self.x = clamp(40, self.x, 1160)
+                            self.x = clamp(40, self.x, 1120)
                     else:
-                        self.x = clamp(40, self.x, 1160)
+                        self.x = clamp(40, self.x, 1120)
                 else:
                     if play_state.map.state == 2:
                         if play_state.map.map_num < 3:
@@ -281,9 +282,9 @@ class Hero:
                             play_state.set_map()
                             self.x = 80
                         else:
-                            self.x = clamp(40, self.x, 1160)
+                            self.x = clamp(40, self.x, 1120)
                     else:
-                        self.x = clamp(40, self.x, 1160)
+                        self.x = clamp(40, self.x, 1120)
             case 'hero:monster':
                 if self.invincible <= 0:
                     self.invincible = 1.5
@@ -380,6 +381,8 @@ class Hero:
         self.cur_state.do(self)
         self.attack_time -= game_framework.frame_time
         self.hand_x, self.hand_y = self.x + 20, self.y + 10
+        if self.invincible_mode:
+            self.invincible = 0.5
         # 피격시 무적 시간
         self.invincible -= game_framework.frame_time
         if self.invincible > 0:

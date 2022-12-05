@@ -198,6 +198,8 @@ def handle_events():
             game_framework.quit()
         elif (event.type, event.key) == (SDL_KEYDOWN, SDLK_ESCAPE):
             game_framework.quit()
+        elif (event.type, event.key) == (SDL_KEYDOWN, SDLK_m):
+            hero.invincible_mode = not hero.invincible_mode
         else:
             hero.handle_event(event)
     # events = get_events()
