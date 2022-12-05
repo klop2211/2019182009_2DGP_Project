@@ -228,7 +228,7 @@ class Hero:
         self.normal = [0, 0]
         self.fall = True
         self.hp = 100
-        self.power = 10
+        self.power = 15
         self.invincible = 0
         self.item = [Item_object.Item('sword', 0, 0, 'equip', 10, 0, 0, 0.2)]
         self.equip_weapon = 0
@@ -257,7 +257,7 @@ class Hero:
     def handle_collision(self, other, group):
         match group:
             case 'hero:wall':
-                self.x = clamp(40, self.x, 1160)
+                self.x = clamp(40, self.x, 1120)
             case 'hero:block':
                 if self.cur_state != JUMP:
                     self.y = clamp(other.top * 40, self.y, 660)
@@ -293,7 +293,7 @@ class Hero:
                 self.item.append(other)
                 game_world.remove_collision_object(other)
                 play_state.items.remove(other)
-                self.change_weapon(self.equip_weapon + 1)
+                self.change_weapon(len(self.item) - 1)
 
     def change_weapon(self, index):
         self.item[self.equip_weapon].state = 'inven'

@@ -228,7 +228,7 @@ class Niflheim(Monster_object.Monster):
         self.dx, self.dy = 0, 0
         self.state = 'enter'
         self.invincible = 1
-        self.cooltime = {'pillar': 0, 'spear': 5, 'crystal': 5}
+        self.cooltime = {'pillar': 0, 'spear': 3, 'crystal': 5}
         self.delay = 0
         self.build_behavior_tree()
         self.hp_back = load_image('./Resource/UI/hp_back.png')

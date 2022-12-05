@@ -113,7 +113,7 @@ class Banshee(Monster_object.Monster):
         check_cooldown_node = LeafNode('Check Cooldown', self.check_cooldown)
         attack_hero_node = LeafNode('Attack Hero', self.attack_hero)
         attack_node = SequenceNode('Attack')
-        attack_node.add_children(find_hero_node, check_cooldown_node, attack_hero_node)
+        attack_node.add_children(check_cooldown_node, attack_hero_node)
 
         self.bt = BehaviorTree(attack_node)
 
