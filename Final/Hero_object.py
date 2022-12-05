@@ -38,11 +38,11 @@ class IDLE:
             self.attack()
         if event == KEY_1:
             self.change_weapon(0)
-        elif event == KEY_2 and self.item[1]:
+        elif event == KEY_2 and len(self.item) >= 2:
             self.change_weapon(1)
-        elif event == KEY_3 and self.item[2]:
+        elif event == KEY_3 and len(self.item) >= 3:
             self.change_weapon(2)
-        elif event == KEY_4 and self.item[3]:
+        elif event == KEY_4 and len(self.item) >= 4:
             self.change_weapon(3)
     @staticmethod
     def do(self):
