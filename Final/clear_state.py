@@ -7,6 +7,7 @@ import game_world
 from pico2d import *
 
 import play_state
+import logo_state
 
 end_image = None
 bgm = None
@@ -26,7 +27,7 @@ def update():
     global end_time
     end_time -= game_framework.frame_time
     if end_time <= 0:
-        game_framework.quit()
+        game_framework.change_state(logo_state)
 
 
 def draw():
@@ -36,7 +37,6 @@ def draw():
     play_state.hero.draw(Camera.camera.x, Camera.camera.y)
     end_image.draw(400, 300, 800, 90)
     update_canvas()
-    pass
 
 
 def handle_events():
